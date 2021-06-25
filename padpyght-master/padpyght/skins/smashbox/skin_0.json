@@ -1,0 +1,113 @@
+{
+  "general": {
+    "background": "base",
+    "background-color": [16, 20, 24],
+    "size": [1219, 624],
+    "anti-aliasing": true
+  },
+  "sticks": {
+    "control-stick": {
+      "position": [352, 218],
+      "size": [72, 72],
+      "radius": 360
+    }
+  },
+  "triggers": {
+	"L": {
+      "position": [804, 266],
+      "size": [72,72],
+	  "depth": 55
+    },
+    "R": {
+      "position": [1029, 254],
+      "size": [72,72],
+	  "depth": 55
+	  }
+  },
+  "buttons": {
+    "T2": {
+      "position": [195, 253],
+      "size": [72, 72]
+    },
+    "B": {
+      "position": [945, 139],
+      "size": [72, 72]
+    },
+    "T": {
+      "position": [796, 184],
+      "size": [72, 72]
+    },
+    "X": {
+      "position": [871, 218],
+      "size": [72, 72]
+    },
+	"Y": {
+      "position": [558, 449],
+      "size": [72, 72]
+    },
+	"X1": {
+      "position": [475, 449],
+      "size": [72, 72]
+    },
+	"Y2": {
+      "position": [517, 378],
+      "size": [72, 72]
+    },
+	"Y1": {
+      "position": [435, 378],
+      "size": [72, 72]
+    },
+	"Z": {
+      "position": [664, 449],
+      "size": [72, 72]
+    },
+	"A": {
+      "position": [706, 378],
+      "size": [72, 72]
+    },
+	"M": {
+      "position": [863, 136],
+      "size": [72, 72]
+    },
+	"LS": {
+      "position": [1020, 172],
+      "size": [72, 72]
+    },
+	"start": {
+      "position": [611, 91],
+      "size": [72, 72]
+    },
+	"C-Left": {
+      "position": [747, 449],
+      "size": [72, 72]
+    },
+	"C-Down": {
+      "position": [953, 221],
+      "size": [72, 72]
+    },
+	"C-Up": {
+      "position": [706, 520],
+      "size": [72, 72]
+    },
+	"C-Right": {
+      "position": [789, 378],
+      "size": [72, 72]
+    },
+	"down": {
+      "position": [352, 218],
+      "size": [72, 72]
+    },
+	"left": {
+      "position": [270, 210],
+      "size": [72, 72]
+    },
+	"up": {
+      "position": [361, 136],
+      "size": [72, 72]
+    },
+	"right": {
+      "position": [434, 227],
+      "size": [72, 72]
+    }
+    }
+}
