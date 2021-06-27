@@ -10,11 +10,11 @@ def test_duration_poller():
     Tests to make sure that the TimeDelayMockPoller's output changes according
     to time after creation.
     """
-    p = poller.TimeDelayMockPoller(consts.SIMPLE_BUTTON_FRAMES, loop=True)
+    p = poller.TimeDelayMockPoller(consts.FAST_BUTTON_FRAMES, loop=True)
     assert next(p) == {"Button0": 0}
-    time.sleep(0.6)
+    time.sleep(2 / poller.DEVICE_HZ)
     assert next(p) == {"Button0": 1}
-    time.sleep(0.6)
+    time.sleep(2 / poller.DEVICE_HZ)
     assert next(p) == {"Button0": 0}
 
 

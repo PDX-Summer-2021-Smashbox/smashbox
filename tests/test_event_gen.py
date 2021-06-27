@@ -10,7 +10,7 @@ def test_time_delay_event_gen():
     captured.
     """
     gen = event_gen.EventGenerator(
-        poller.TimeDelayMockPoller(consts.SIMPLE_BUTTON_FRAMES, loop=True)
+        poller.TimeDelayMockPoller(consts.FAST_BUTTON_FRAMES, loop=True)
     )
     assert list(itertools.islice(iter(gen), 2)) == [("Button0", 1), ("Button0", 0)]
 
