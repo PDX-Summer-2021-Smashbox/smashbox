@@ -28,5 +28,3 @@ jobs:
         run: python3 -m poetry install
       - name: Run poetry pytest
         run: python3 -m poetry run pytest
-      - name: Run poetry tox
-        run: python3 -m poetry run tox
