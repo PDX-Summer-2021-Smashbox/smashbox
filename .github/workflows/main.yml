@@ -26,7 +26,5 @@ jobs:
 
       - name: Run poetry install
         run: python3 -m poetry install
-      - name: Run poetry black
-        run: python3 -m poetry run black --check
       - name: Run poetry pytest
         run: python3 -m poetry run pytest
