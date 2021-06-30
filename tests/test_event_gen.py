@@ -24,3 +24,21 @@ def test_sequential_event_gen():
         poller.SequentialMockPoller(consts.SIMPLE_BUTTON_FRAMES, loop=True)
     )
     assert list(itertools.islice(iter(gen), 4)) == [("Button0", 1), ("Button0", 0)] * 2
+
+
+def test_frame_parser_event_gen():
+    """
+    Tests to make sure that an EventGenerator based on a FrameParser produces
+    the appropriate events.
+    """
+    gen = event_gen.EventGenerator(
+        poller.FrameParser(
+            poller.SequentialMockPoller(consts.FRAME_PARSER_FRAMES),
+            consts.COMBINE_AXES_DICT,
+        )
+    )
+    assert list(iter(gen)) == [
+        ("Joystick1", (0.5, 0)),
+        ("Button0", 1),
+        ("Joystick1", (1, 1)),
+    ]
