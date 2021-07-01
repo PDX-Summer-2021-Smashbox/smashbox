@@ -1,7 +1,7 @@
 import itertools
 import time
 
-from smashbox import poller
+from smashbox_viewer import poller
 from . import consts
 
 

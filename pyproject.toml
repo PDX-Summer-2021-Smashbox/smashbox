@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "smashbox"
+name = "smashbox_viewer"
 version = "0.1.0"
 description = ""
 authors = ["Michael Bottini <mbottini1@gmail.com>"]
@@ -13,7 +13,7 @@ pytest = "^5.2"
 black = "^21.6b0"
 
 [tool.poetry.scripts]
-recorder = "smashbox.recorder:main"
+recorder = "smashbox_viewer.recorder:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

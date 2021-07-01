@@ -1,4 +1,4 @@
-from smashbox import __version__
+from smashbox_viewer import __version__
 
 
 def test_version():

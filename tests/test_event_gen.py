@@ -1,6 +1,6 @@
 import itertools
 
-from smashbox import event_gen, poller
+from smashbox_viewer import event_gen, poller
 from . import consts
 
 
