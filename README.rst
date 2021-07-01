@@ -1,12 +1,41 @@
 ========
-smashbox
+Smashbox Viewer
 ========
 
-Smashbox button visualizer
+This button visualizer for the Smashbox controller will allow users to live view the buttons
+that are being pressed while the controller is in use.
 
-At the moment, this is a couple of libraries for parsing joystick events from
-PyGame in a format that can be tested. Later, this is going to be used to
-visualize button presses for a Smashbox controller.
+The Smashbox controller is an arcade button style controller that is meant to emulate 
+a Nintendo Gamecube controller. The Smashbox replaces the analog 2-axis joysticks with 4 buttons
+that represent the cardinal angles of the joysticks and 7 modifier buttons to output the
+intermediate angles. The Smashbox still outputs the same information as the normal Gamecube
+controller. This program will interpret the output from the controller and display the button
+combinations pressed so users can accurately show controller inputs.  
+
+=======
+Roadmap
+=======
+
+Week 1 - Frame poller and event generator - DONE
+    Polls the controller for its current state as a frame, can also
+    record a set of frames. Event generator checks for differences
+    between frames based on a set tolerance.
+
+Week 2 - Visual assets, README, License
+    Visualizer image resources and project information. 
+
+Week 4 - Mapping
+    Input mapping for frame data.
+
+Week 5 - Calibration
+    Initial controller setup handling.
+
+Week 7 - Visualizer (MVP)
+    Display of controller data from event generator.
+
+============================
+Development Notes
+============================
 
 ============================
 Getting Started With Poetry
