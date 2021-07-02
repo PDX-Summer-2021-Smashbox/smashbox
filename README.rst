@@ -2,7 +2,7 @@
 Smashbox Viewer
 ========
 
-Lawrence Gunnell, Michael Bottini, Bennet Wright, Jordan Malubay
+Lawrence Gunnell, Michael Bottini, Bennett Wright, Jordan Malubay
 
 This button visualizer for the Smashbox controller will allow users to live view the buttons
 that are being pressed while the controller is in use.
