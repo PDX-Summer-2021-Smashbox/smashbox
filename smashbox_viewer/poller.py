@@ -113,6 +113,44 @@ class SequentialMockPoller:
         return self.poll()
 
 
+class FrameParser:
+    """
+    Class to combine attributes from frames into single units. For example, it
+    may be the case that two axes should be considered as a single joystick.  In
+    this case, we can associate a 'joystick1' field with 'Axis1' and 'Axis2',
+    and the FrameParser will take a frame that contains Axis1 and Axis2 and
+    return a frame that associates 'joystick1' with a tuple of the contents of
+    'Axis1' and 'Axis2'.
+
+    This is also a Device, meaning that it implements `poll` and is an iterable.
+    """
+
+    def __init__(self, device, dct):
+        self.device = device
+        self.dct = dct
+
+    def poll(self):
+        return parse_frame(self.dct, self.device.poll())
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self.poll()
+
+
+def parse_frame(dct, frame):
+    result = {}
+    untouched_keys = [
+        k for k in frame if k not in set(itertools.chain.from_iterable(dct.values()))
+    ]
+    for k, val_lst in dct.items():
+        result[k] = tuple(frame[v] for v in val_lst)
+    for k in untouched_keys:
+        result[k] = frame[k]
+    return result
+
+
 def create_time_delay_mock_poller(filename, *, loop=False):
     """Creates a TimeDelayMockPoller from a JSON object."""
     with open(filename) as f:

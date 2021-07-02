@@ -1,6 +1,6 @@
-========
+===============
 Smashbox Viewer
-========
+===============
 
 Lawrence Gunnell, Michael Bottini, Bennett Wright, Jordan Malubay
 
@@ -63,16 +63,16 @@ And in some other Python environment, (possibly a venv or something similar) run
 
 .. code-block:: bash
 
-    python -m pip install smashbox-0.1.0-py3-none-any.whl
+    python -m pip install smashbox_viewer-0.1.0-py3-none-any.whl
 
-This will install ``smashbox``, along with its dependencies (``pygame``).
+This will install ``smashbox_viewer``, along with its dependencies (``pygame``).
 
-You can now import the ``smashbox`` library in your code and run the 
-``smashbox.recorder`` with
+You can now import the ``smashbox_viewer`` library in your code and run the 
+``smashbox_viewer.recorder`` with
 
 .. code-block:: bash
 
-    python -m smashbox.recorder
+    python -m smashbox_viewer.recorder
 
 ===========================================
 Playing Nicely with IDEs During Development
