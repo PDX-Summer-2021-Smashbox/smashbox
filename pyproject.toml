@@ -2,7 +2,10 @@
 name = "smashbox_viewer"
 version = "0.1.0"
 description = ""
-authors = ["Michael Bottini <mbottini1@gmail.com>"]
+authors = ["Michael Bottini <mbottini1@gmail.com>",
+           "Lawrence Gunnell <lgunnell@pdx.edu>",
+           "Bennet Wright <bdw5@pdx>",
+           "Jordan Malubay <jmalubay@pdx.edu>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
