@@ -1,7 +1,8 @@
+"""
+Enumerates each of the roles that are assignable to individual buttons on a Smash Box controller.
+"""
+
 BUTTON_ROLES = [
-    """
-        Enumerates each of the roles that are assignable to individual buttons on a Smash Box controller.
-    """
     "Button_Disabled",  # Disables the button for this particular profile
     # Joystick Inputs (Range from +/- 0.0 to +/- 1.0 in increments of 1/127).
     "Analog_Stick_Up",  # Ranges from 0.0 to  1.0
