@@ -15,12 +15,13 @@ GROUP_NAMES = [
     "Top_Center",
     "Top_Right",
     "Bottom_Right",
-    "Left_Side"  # Rocker switch and Nunchuk button assignments.
+    "Left_Side",  # Rocker switch and Nunchuk button assignments.
 ]
 
 BUTTON_NAMES = [
     # Contains the following button names: Button_1, Button_2, ... BUTTON_TOTAL_BUTTON_COUNT.
-    'Button_' + str(x) for x in range(1,TOTAL_BUTTON_COUNT + 1)
+    f"Button_{x}"
+    for x in range(1, TOTAL_BUTTON_COUNT + 1)
 ]
 
 # Number of buttons in each group.
@@ -35,12 +36,12 @@ GROUP_SIZES = {
 
 # Specific buttons assigned to each group.
 BUTTON_GROUPS = {
-    GROUP_NAMES[0]: (BUTTON_NAMES[0:5]),
-    GROUP_NAMES[1]: (BUTTON_NAMES[5:9]),
-    GROUP_NAMES[2]: (BUTTON_NAMES[9]),
-    GROUP_NAMES[3]: (BUTTON_NAMES[10:18]),
-    GROUP_NAMES[4]: (BUTTON_NAMES[18:23]),
-    GROUP_NAMES[5]: (BUTTON_NAMES[23:])
+    GROUP_NAMES[0]: BUTTON_NAMES[0:5],
+    GROUP_NAMES[1]: BUTTON_NAMES[5:9],
+    GROUP_NAMES[2]: BUTTON_NAMES[9:10],
+    GROUP_NAMES[3]: BUTTON_NAMES[10:18],
+    GROUP_NAMES[4]: BUTTON_NAMES[18:23],
+    GROUP_NAMES[5]: BUTTON_NAMES[23:],
 }
 
 # Specific tuple assignments representing the default X,Y button coordinates for each button.
@@ -69,7 +70,7 @@ BUTTON_LOCATIONS = {
     "Button_21": (664, 449),
     "Button_22": (747, 449),
     "Button_23": (706, 520),
-    "Button_24": (0, 41),     # Left Side Rocker Toggle in Top Left
+    "Button_24": (0, 41),  # Left Side Rocker Toggle in Top Left
     "Button_25": (976, 492),  # Right Nunchuk Top button display in Bottom Right
     "Button_26": (976, 570),  # Right Nunchuk Bottom button display in Bottom Right
 }
