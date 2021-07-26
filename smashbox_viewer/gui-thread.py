@@ -44,7 +44,7 @@ class Gui:
 
         self.menu = tk.StringVar(self.menu_frame)
         self.menu.set("Select")
-        self.select = tk.OptionMenu(self.menu_frame, self.menu, "one","two")
+        self.select = tk.OptionMenu(self.menu_frame, self.menu, "one", "two")
         self.select.pack()
 
         self.bt_frame = tk.Frame(master=self.master)
@@ -113,6 +113,7 @@ class Gui:
     TODO: once mapping is handled will need to handle buttons individually
     to get proper images
     """
+
     def update(self, diff):
         if "Button" in diff[0]:
             key = diff[0].split("n")
@@ -158,6 +159,7 @@ class Gui:
         self.canvas.update_idletasks()
         self.canvas.update()
 
+
 class ThreadClient:
     def __init__(self, master, device):
         self.master = master
@@ -176,7 +178,7 @@ class ThreadClient:
             self.master.destroy()
             sys.exit()
         self.master.after(0, self.eventCall)
-    
+
     def runVis(self):
         for event in EventGenerator(self.device):
             if not self.running:
@@ -190,16 +192,16 @@ class ThreadClient:
 
 # Testing program
 
+
 def main():
     pygame.display.init()
     pygame.joystick.init()
     device = JoystickPoller(pygame.joystick.Joystick(0))
     device.joystick.init()
-    
-    root = tk.Tk()
-    gui = ThreadClient(root,device)
-    root.mainloop()
 
+    root = tk.Tk()
+    gui = ThreadClient(root, device)
+    root.mainloop()
 
 
 if __name__ == "__main__":
