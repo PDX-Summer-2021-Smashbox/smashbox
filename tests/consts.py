@@ -42,3 +42,10 @@ TRANSLATOR_FRAMES = [
     {"Button1": 1, "Button2": 0, "Button3": 0, "Button4": 0, "ModifierButton": 1},
     {"Button1": 1, "Button2": 0, "Button3": 1, "Button4": 0, "ModifierButton": 0},
 ]
+
+TRANSLATOR_EVENT_FRAMES = [
+    ("Button1", 1),
+    ("ModifierButton", 1),
+    ("Button3", 1),
+    ("ModifierButton", 0),
+]
