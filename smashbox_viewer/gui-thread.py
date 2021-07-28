@@ -53,6 +53,11 @@ class Gui:
         self.select = tk.OptionMenu(self.menu_frame, self.menu, "normal", "mapper")
         self.select.pack()
         '''
+        # Right click context menu
+        self.menu = tk.Menu(master=self.master, tearoff=False)
+        self.menu.add_command(label="mapper gui", command=self.gui_map)
+        self.menu.add_command(label="mapper cli", command=self.cli_map)
+        master.bind("<Button-3>", self.show_menu)
 
         self.bt_frame = tk.Frame(master=self.master)
         self.bt_frame.pack()
@@ -107,11 +112,6 @@ class Gui:
             self.canvas.create_rectangle(350, 445, 375, 455, fill="blue"),
         ]
 
-        # Right click context menu
-        self.menu = tk.Menu(master=self.master, tearoff=False)
-        self.menu.add_command(label="mapper", command=self.mapper.cli)
-        master.bind("<Button-3>", self.show_menu)
-
     def processEvent(self):
         while self.queue.qsize():
             event = self.queue.get(0)
@@ -128,14 +128,18 @@ class Gui:
 
     def show_menu(self, event):
         try:
-            self.menu.tk_popup(event.x_root, event.y_root, 0)
-
+            self.menu.post(event.x_root, event.y_root)
         finally:
             self.menu.grab_release()
-
     
-    def expand_gui(self):
-        print("expand hit") 
+    def gui_map(self):
+        self.master.geometry('1300x700')
+        # self.mapper.gui(self.canvas, self.bt_frame)
+        # print("gui map")
+
+    def cli_map(self):
+        self.mapped_roles = self.mapper.cli() 
+        print(self.mapped_roles)
 
 
     def update(self, diff):

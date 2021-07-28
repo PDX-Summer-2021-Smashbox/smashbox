@@ -20,7 +20,7 @@ class Mapper:
     def verify_input(self, button):
         map_index = -1
         while not int(map_index) in range(len(BUTTON_ROLES)):
-            index = input("Set {0} to index: ".format(button))
+            index = input(f"Set {button} to index: ")
             map_index = index if index.isdigit() else -1
 
         return int(map_index)
@@ -28,8 +28,8 @@ class Mapper:
     def cli(self):
         print("INDEX    BUTTON ROLE")
         for indx, role in enumerate(BUTTON_ROLES):
-            print("{0}    |  {1}".format(indx, role))
-        # Loop thru each button and map to a role    
+            print(f"{indx}    |  {role}")
+        
         for button in BUTTON_NAMES:
             map_index = self.verify_input(button)
             self.mapped_buttons[button] = BUTTON_ROLES[map_index]
@@ -37,14 +37,8 @@ class Mapper:
         return self.mapped_buttons
  
     def gui(self, canvas, bt_frame):
-        canvas = tk.Canvas(bt_frame, width=1500, height=624)
+        canvas = tk.Canvas(bt_frame, width=1600, height=620)
         canvas.pack()
-        print("gui hit")
-        # pass
-
-    def test(self):
-        print("test in mapper hit")
-
 
 
 # Testing
