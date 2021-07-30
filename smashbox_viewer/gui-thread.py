@@ -1,7 +1,7 @@
 import importlib.resources
 from tkinter.font import BOLD
 from smashbox_viewer.button_roles import BUTTON_ROLES
-from tkinter.constants import ANCHOR, BOTH, RIGHT
+from tkinter.constants import ANCHOR, BOTH, END, LEFT, NE, RIGHT, TOP, VERTICAL
 from smashbox_viewer.mapper import Mapper
 import tkinter as tk
 
@@ -44,7 +44,7 @@ class Gui:
 
         master.title("Smashbox Viewer")
 
-        self.master.protocol("WM_DELETE_WINDOW", "end")
+        self.master.protocol("WM_DELETE_WINDOW", END)
 
         # Right click context menu
         self.menu = tk.Menu(master=self.master, tearoff=False)
@@ -53,13 +53,10 @@ class Gui:
         master.bind("<Button-3>", self.show_menu)
 
         self.bt_frame = tk.Frame(master=self.master)
-        self.bt_frame.pack()
-        self.canvas = tk.Canvas(self.bt_frame, width=1319, height=624)
+        self.bt_frame.pack(side=LEFT)
+        self.canvas = tk.Canvas(self.bt_frame, width=1219, height=624)
         self.canvas.pack()
 
-        # List box
-        # self.map_frame = tk.Frame(master=self.master)
-        # self.map_frame.grid(row=0, column=1, pady=10)
         
         with get_resource("base-unmapped.png") as img_fh:
             self.background = ImageTk.PhotoImage(Image.open(img_fh))
@@ -137,22 +134,24 @@ class Gui:
             Extend only one side of window?
             Clean up gui, make it look fancy
         '''
-        self.canvas.configure(width=1530, height=624)
-        self.list_bx = tk.Listbox(master=self.bt_frame, width=155, height=30)
-        self.list_bx.place(x=1229, y=1)
+        self.canvas.configure(width=1560, height=624)
 
-        for val in BUTTON_ROLES:
-           self.list_bx.insert("end", val)
+        self.map_frame = tk.Frame(master=self.master)
+        self.map_frame.place(x=1224, y=1)
+
+        self.list_bx = tk.Listbox(master=self.map_frame, width=53, height=30)
+        self.list_bx.pack(side=LEFT)
+
+        self.sb = tk.Scrollbar(master=self.map_frame, orient=VERTICAL)
+        self.sb.pack(side=RIGHT, fill=BOTH)
+
+        self.list_bx.configure(yscrollcommand=self.sb.set)
+        self.sb.config(command=self.list_bx.yview)
+
+        for btn in BUTTON_ROLES:
+           self.list_bx.insert(END, btn)
 
         
-
-        # self.scroll_bar = tk.Scrollbar(self.bt_frame, orient="vertical")
-        # self.scroll_bar.pack()
-        # self.scroll_bar.config(command=self.list_bx.yview)
-
-        # self.list_bx.config(yscrollcommand=self.scroll_bar.set)
- 
-
     def cli_map(self):
         self.mapped_roles = self.mapper.cli() 
         print(self.mapped_roles)
