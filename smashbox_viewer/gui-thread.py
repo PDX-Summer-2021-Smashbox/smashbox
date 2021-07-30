@@ -1,7 +1,8 @@
 import importlib.resources
+from os import read
 from tkinter.font import BOLD
 from smashbox_viewer.button_roles import BUTTON_ROLES
-from tkinter.constants import ANCHOR, BOTH, END, LEFT, NE, RIGHT, TOP, VERTICAL
+from tkinter.constants import ANCHOR, BOTH, BOTTOM, END, LEFT, NE, RIGHT, S, SE, SW, TOP, VERTICAL
 from smashbox_viewer.mapper import Mapper
 import tkinter as tk
 
@@ -41,7 +42,6 @@ class Gui:
         self.buttons = []
         self.mapper = Mapper()
 
-
         master.title("Smashbox Viewer")
 
         self.master.protocol("WM_DELETE_WINDOW", END)
@@ -51,6 +51,10 @@ class Gui:
         self.menu.add_command(label="mapper gui", command=self.gui_map)
         self.menu.add_command(label="mapper cli", command=self.cli_map)
         master.bind("<Button-3>", self.show_menu)
+
+
+
+
 
         self.bt_frame = tk.Frame(master=self.master)
         self.bt_frame.pack(side=LEFT)
@@ -107,6 +111,14 @@ class Gui:
             self.canvas.create_rectangle(350, 445, 375, 455, fill="blue"),
         ]'''
 
+
+        '''
+        DEBUG: XXX Getting mouse coordinates
+        '''        
+        self.master.bind('<Motion>', self.motion)
+
+
+
     def processEvent(self):
         while self.queue.qsize():
             event = self.queue.get(0)
@@ -120,43 +132,6 @@ class Gui:
     TODO: once mapping is handled will need to handle buttons individually
     to get proper images
     """
-
-    def show_menu(self, event):
-        try:
-            self.menu.post(event.x_root, event.y_root)
-        finally:
-            self.menu.grab_release()
-    
-    def gui_map(self):
-        '''
-        TODO
-            Make list_bx move with gui
-            Extend only one side of window?
-            Clean up gui, make it look fancy
-        '''
-        self.canvas.configure(width=1560, height=624)
-
-        self.map_frame = tk.Frame(master=self.master)
-        self.map_frame.place(x=1224, y=1)
-
-        self.list_bx = tk.Listbox(master=self.map_frame, width=53, height=30)
-        self.list_bx.pack(side=LEFT)
-
-        self.sb = tk.Scrollbar(master=self.map_frame, orient=VERTICAL)
-        self.sb.pack(side=RIGHT, fill=BOTH)
-
-        self.list_bx.configure(yscrollcommand=self.sb.set)
-        self.sb.config(command=self.list_bx.yview)
-
-        for btn in BUTTON_ROLES:
-           self.list_bx.insert(END, btn)
-
-        
-    def cli_map(self):
-        self.mapped_roles = self.mapper.cli() 
-        print(self.mapped_roles)
-
-
     def update(self, diff):
         if "Button" in diff[0]:
             key = diff[0].split("n")
@@ -201,6 +176,68 @@ class Gui:
 
         self.canvas.update_idletasks()
         self.canvas.update()
+
+    def show_menu(self, event):
+        try:
+            self.menu.post(event.x_root, event.y_root)
+        finally:
+            self.menu.grab_release()
+
+        ''' DEBUG: 
+            XXX:
+            Getting mouse coordinates
+        '''
+    def motion(self, event):
+        x, y = event.x, event.y
+        print(f"({x}, {y})")
+    
+
+    def gui_map(self):
+        '''
+        TODO
+            Make list_bx move with gui
+            Extend only one side of window?
+            Clean up gui, make it look fancy
+        '''
+        self.canvas.configure(width=1560, height=624)
+
+        self.map_frame = tk.Frame(master=self.master)
+        self.map_frame.place(x=1224, y=1)
+
+        self.list_bx = tk.Listbox(master=self.map_frame, width=53, height=30)
+        self.list_bx.pack(side=LEFT)
+
+        self.sb = tk.Scrollbar(master=self.map_frame, orient=VERTICAL)
+        self.sb.pack(side=RIGHT, fill=BOTH)
+
+        self.list_bx.configure(yscrollcommand=self.sb.set)
+        self.sb.config(command=self.list_bx.yview)
+
+        for btn in BUTTON_ROLES:
+           self.list_bx.insert(END, btn)
+
+        # Add the mapping buttons
+        self.save_btn = tk.Button(master=self.master,
+                                    text="Save", width=16,
+                                    height=1)
+        self.cancel_btn = tk.Button(master=self.master,
+                                    text="Cancel", width=16,
+                                    height=1)
+        self.import_btn = tk.Button(master=self.master, 
+                                    text="Import", width=41,
+                                    height=1)
+        self.export_btn = tk.Button(master=self.master,
+                                    text="Export", width=41,
+                                    height=1)
+
+        self.save_btn.place(x=1243, y=501)
+        self.cancel_btn.place(x=1416, y=501)
+        self.import_btn.place(x=1243, y=552)
+        self.export_btn.place(x=1243, y=586)
+
+    def cli_map(self):
+        self.mapped_roles = self.mapper.cli() 
+        print(self.mapped_roles)
 
 
 class ThreadClient:
