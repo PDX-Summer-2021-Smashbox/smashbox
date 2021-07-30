@@ -1,4 +1,7 @@
 import importlib.resources
+from tkinter.font import BOLD
+from smashbox_viewer.button_roles import BUTTON_ROLES
+from tkinter.constants import ANCHOR, BOTH, RIGHT
 from smashbox_viewer.mapper import Mapper
 import tkinter as tk
 
@@ -11,7 +14,6 @@ from smashbox_viewer.button_locations import BUTTON_LOCATIONS
 from smashbox_viewer.poller import *
 import smashbox_viewer.resources.skins.default as resources
 
-import mapper 
 
 
 def get_resource(filename):
@@ -42,17 +44,8 @@ class Gui:
 
         master.title("Smashbox Viewer")
 
-        self.master.protocol("WM_DELETE_WINDOW", end)
+        self.master.protocol("WM_DELETE_WINDOW", "end")
 
-        self.menu_frame = tk.Frame(master=self.master)
-        self.menu_frame.pack()
-
-        '''
-        self.menu = tk.StringVar(self.menu_frame)
-        self.menu.set("Select")
-        self.select = tk.OptionMenu(self.menu_frame, self.menu, "normal", "mapper")
-        self.select.pack()
-        '''
         # Right click context menu
         self.menu = tk.Menu(master=self.master, tearoff=False)
         self.menu.add_command(label="mapper gui", command=self.gui_map)
@@ -61,9 +54,13 @@ class Gui:
 
         self.bt_frame = tk.Frame(master=self.master)
         self.bt_frame.pack()
-        self.canvas = tk.Canvas(self.bt_frame, width=1219, height=624)
+        self.canvas = tk.Canvas(self.bt_frame, width=1319, height=624)
         self.canvas.pack()
 
+        # List box
+        # self.map_frame = tk.Frame(master=self.master)
+        # self.map_frame.grid(row=0, column=1, pady=10)
+        
         with get_resource("base-unmapped.png") as img_fh:
             self.background = ImageTk.PhotoImage(Image.open(img_fh))
 
@@ -97,6 +94,7 @@ class Gui:
             345,
             self.canvas.create_oval(245, 345, 255, 355, fill="grey", outline="black"),
         ]
+        '''
         # Stick two center locations, and oval
         self.stick2 = [
             245,
@@ -110,7 +108,7 @@ class Gui:
             450,
             self.canvas.create_rectangle(350, 345, 375, 355, fill="blue"),
             self.canvas.create_rectangle(350, 445, 375, 455, fill="blue"),
-        ]
+        ]'''
 
     def processEvent(self):
         while self.queue.qsize():
@@ -133,9 +131,27 @@ class Gui:
             self.menu.grab_release()
     
     def gui_map(self):
-        self.master.geometry('1300x700')
-        # self.mapper.gui(self.canvas, self.bt_frame)
-        # print("gui map")
+        '''
+        TODO
+            Make list_bx move with gui
+            Extend only one side of window?
+            Clean up gui, make it look fancy
+        '''
+        self.canvas.configure(width=1530, height=624)
+        self.list_bx = tk.Listbox(master=self.bt_frame, width=155, height=30)
+        self.list_bx.place(x=1229, y=1)
+
+        for val in BUTTON_ROLES:
+           self.list_bx.insert("end", val)
+
+        
+
+        # self.scroll_bar = tk.Scrollbar(self.bt_frame, orient="vertical")
+        # self.scroll_bar.pack()
+        # self.scroll_bar.config(command=self.list_bx.yview)
+
+        # self.list_bx.config(yscrollcommand=self.scroll_bar.set)
+ 
 
     def cli_map(self):
         self.mapped_roles = self.mapper.cli() 
