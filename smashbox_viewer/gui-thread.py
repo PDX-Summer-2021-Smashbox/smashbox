@@ -2,7 +2,7 @@ import importlib.resources
 from os import read
 from tkinter.font import BOLD
 from smashbox_viewer.button_roles import BUTTON_ROLES
-from tkinter.constants import ANCHOR, BOTH, BOTTOM, END, LEFT, NE, RIGHT, S, SE, SW, TOP, VERTICAL
+from tkinter.constants import ANCHOR, BOTH, BOTTOM, CENTER, END, LEFT, NE, RIGHT, S, SE, SW, TOP, VERTICAL
 from smashbox_viewer.mapper import Mapper
 import tkinter as tk
 
@@ -46,21 +46,18 @@ class Gui:
 
         self.master.protocol("WM_DELETE_WINDOW", END)
 
+        self.master.resizable(False, False)
+
         # Right click context menu
         self.menu = tk.Menu(master=self.master, tearoff=False)
         self.menu.add_command(label="mapper gui", command=self.gui_map)
         self.menu.add_command(label="mapper cli", command=self.cli_map)
         master.bind("<Button-3>", self.show_menu)
 
-
-
-
-
         self.bt_frame = tk.Frame(master=self.master)
         self.bt_frame.pack(side=LEFT)
         self.canvas = tk.Canvas(self.bt_frame, width=1219, height=624)
         self.canvas.pack()
-
         
         with get_resource("base-unmapped.png") as img_fh:
             self.background = ImageTk.PhotoImage(Image.open(img_fh))
@@ -210,7 +207,7 @@ class Gui:
         self.sb = tk.Scrollbar(master=self.map_frame, orient=VERTICAL)
         self.sb.pack(side=RIGHT, fill=BOTH)
 
-        self.list_bx.configure(yscrollcommand=self.sb.set)
+        self.list_bx.configure(yscrollcommand=self.sb.set, justify=CENTER)
         self.sb.config(command=self.list_bx.yview)
 
         for btn in BUTTON_ROLES:
@@ -218,11 +215,11 @@ class Gui:
 
         # Add the mapping buttons
         self.save_btn = tk.Button(master=self.master,
-                                    text="Save", width=16,
+                                    text="Set", width=16,
                                     height=1)
         self.cancel_btn = tk.Button(master=self.master,
                                     text="Cancel", width=16,
-                                    height=1)
+                                    height=1, command=self.close_map)
         self.import_btn = tk.Button(master=self.master, 
                                     text="Import", width=41,
                                     height=1)
@@ -234,6 +231,16 @@ class Gui:
         self.cancel_btn.place(x=1416, y=501)
         self.import_btn.place(x=1243, y=552)
         self.export_btn.place(x=1243, y=586)
+
+    def close_map(self):
+        self.map_frame.destroy()
+        self.list_bx.destroy()
+        self.sb.destroy()
+        self.save_btn.destroy()
+        self.cancel_btn.destroy()
+        self.import_btn.destroy()
+        self.export_btn.destroy()
+        self.canvas.configure(width=1219, height=624)
 
     def cli_map(self):
         self.mapped_roles = self.mapper.cli() 
