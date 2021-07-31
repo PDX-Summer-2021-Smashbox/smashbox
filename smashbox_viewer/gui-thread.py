@@ -16,7 +16,6 @@ from smashbox_viewer.poller import *
 import smashbox_viewer.resources.skins.default as resources
 
 
-
 def get_resource(filename):
     """
     Wrapper around importlib's resources functionality. Returns a context
@@ -113,7 +112,6 @@ class Gui:
         DEBUG: XXX Getting mouse coordinates
         '''        
         self.master.bind('<Motion>', self.motion)
-
 
 
     def processEvent(self):
