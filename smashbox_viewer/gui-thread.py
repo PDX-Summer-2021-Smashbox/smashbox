@@ -47,16 +47,16 @@ class Gui:
 
         self.master.resizable(False, False)
 
+        self.bt_frame = tk.Frame(master=self.master)
+        self.bt_frame.pack()
+        self.canvas = tk.Canvas(self.bt_frame, width=1219, height=624)
+        self.canvas.pack()
+
         # Right click context menu
-        self.menu = tk.Menu(master=self.master, tearoff=False)
+        self.menu = tk.Menu(master=self.bt_frame, tearoff=False)
         self.menu.add_command(label="mapper gui", command=self.gui_map)
         self.menu.add_command(label="mapper cli", command=self.cli_map)
         master.bind("<Button-3>", self.show_menu)
-
-        self.bt_frame = tk.Frame(master=self.master)
-        self.bt_frame.pack(side=LEFT)
-        self.canvas = tk.Canvas(self.bt_frame, width=1219, height=624)
-        self.canvas.pack()
 
         with get_resource("base-unmapped.png") as img_fh:
             self.background = ImageTk.PhotoImage(Image.open(img_fh))
@@ -91,7 +91,7 @@ class Gui:
             345,
             self.canvas.create_oval(245, 345, 255, 355, fill="grey", outline="black"),
         ]
-        """
+        
         # Stick two center locations, and oval
         self.stick2 = [
             245,
@@ -105,7 +105,7 @@ class Gui:
             450,
             self.canvas.create_rectangle(350, 345, 375, 355, fill="blue"),
             self.canvas.create_rectangle(350, 445, 375, 455, fill="blue"),
-        ]"""
+        ]
 
     def processEvent(self):
         while self.queue.qsize():
