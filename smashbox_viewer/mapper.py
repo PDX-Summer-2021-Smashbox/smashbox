@@ -4,10 +4,11 @@ from tkinter.constants import BOTH, CENTER, END, LEFT, RIGHT, VERTICAL
 
 import tkinter as tk
 import json
+import smashbox_viewer.gui 
 
-# from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageTk, ImageFont, ImageDraw
 
-
+import smashbox_viewer.resources.skins.default as resources
 class Mapper:
     """
     Class to map the buttons to their roles.
@@ -21,18 +22,22 @@ class Mapper:
         self.mapped_buttons = {}
         self.buttons = []
 
-    def gui(self, master, background, button_img, rst_func):
+    def gui(self, master, x, y):
         self.master = master
-        self.button_img = button_img
+        #with smashbox_viewer.gui.get_resource("A-2.png") as img_fh:
+            #self.button_img = ImageTk.PhotoImage(Image.open(img_fh))
+        #smashbox_viewer.gui.get_resource()
+        #self.button_img = button_img
 
-        self.restore_function = rst_func
+        #self.restore_function = rst_func
 
         self.mp_frame = tk.Frame(master=self.master)
         self.mp_frame.pack()
         self.mp_canvas = tk.Canvas(self.mp_frame, width=1560, height=624)
+        self.master.geometry(f"1560x624+{x}+{y}")
         self.mp_canvas.pack()
 
-        self.mp_canvas.create_image(0, 0, anchor="nw", image=background)
+        #self.mp_canvas.create_image(0, 0, anchor="nw", image=background)
 
         # place the buttons
         self.place_btns()
@@ -96,7 +101,11 @@ class Mapper:
         self.buttons.clear()
 
         # Restore the main gui and pass in the newly mapped buttons
-        self.restore_function(self.mapped_buttons)
+        # export the mapped buttons
+        self.export_mapped()
+        self.master.destroy()
+        #self.open_new_window(self.master)
+        #self.restore_function(self.mapped_buttons)
 
     def cli(self):
         print("INDEX    BUTTON ROLE")
@@ -126,10 +135,10 @@ class Mapper:
             self.buttons.append(
                 tk.Button(
                     master=self.master,
-                    image=self.button_img,
+                    #image=self.button_img,
                     border=0,
                     highlightthickness=0,
-                    bg="white",
+                    bg="green",
                     bd=0,
                     command=lambda b=btn: self.map_btn(b),
                 )
@@ -148,6 +157,21 @@ class Mapper:
             self.mapped_buttons = json.load(import_file)
 
         print(self.mapped_buttons)
+
+
+    def open_new_window(self, root):
+        master = tk.Tk()
+        master.title("new window")
+        master.geometry(f"1219x624+{root.winfo_x()}+{root.winfo_y()}")
+
+        root.destroy()
+
+        test_frame = tk.Frame(master=master)
+        test_frame.pack()
+        test_canvas = tk.Canvas(test_frame, width=1219, height=624)
+        test_canvas.pack()
+        label = tk.Label(master, text="new window")
+        label.place(x=100, y=100)
 
 
 # Testing

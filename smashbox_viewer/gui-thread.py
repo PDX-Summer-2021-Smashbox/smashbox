@@ -97,7 +97,7 @@ class Gui:
             345,
             self.canvas.create_oval(245, 345, 255, 355, fill="grey", outline="black"),
         ]
-        
+     
         # Stick two center locations, and oval
         self.stick2 = [
             245,
@@ -116,8 +116,8 @@ class Gui:
     def open_map(self):
         mapper = Mapper()
         root = tk.Tk()
-        root.geometry(f"1219x624+{self.master.winfo_x()}+{self.master.winfo_y()}")
-        mapper.gui(root)
+        #root.geometry(f"1219x624+{self.master.winfo_x()}+{self.master.winfo_y()}")
+        mapper.gui(root, root.winfo_x(), root.winfo_y())
         root.mainloop()
         
     """

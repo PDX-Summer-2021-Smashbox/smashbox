@@ -1,9 +1,5 @@
 {
-    "Button_18": "Button_A",
-    "Button_14": "Button_A",
-    "Button_13": "Button_A",
-    "Button_12": "Button_A",
-    "Button_11": "Button_A",
-    "Button_15": "Button_A",
-    "Button_16": "Button_A"
+    "Button_18": "C_Stick_Left",
+    "Button_15": "C_Stick_Left",
+    "Button_4": "C_Stick_Left"
 }
