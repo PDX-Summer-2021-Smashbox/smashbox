@@ -46,12 +46,7 @@ class Mapper:
         self.master = master
         self.button_img = button_img
 
-        #self.restore_cnv = rstr_canvas
-        #self.restore_frm = rstr_frame
         self.restore_function = rst_func
-
-        # Disable context menu while in mapper
-        # self.master.unbind("<Button-3>")
 
         self.mp_frame = tk.Frame(master=self.master)
         self.mp_frame.pack()
@@ -79,11 +74,8 @@ class Mapper:
            self.list_bx.insert(END, btn)
 
         # Add the mapping buttons
-        self.save_btn = tk.Button(master=self.master,
-                                    text="Set", width=16,
-                                    height=1)
-        self.cancel_btn = tk.Button(master=self.master,
-                                    text="Cancel", width=16,
+        self.save_exit_btn = tk.Button(master=self.master,
+                                    text="Save / Exit", width=41,
                                     height=1, command=self.close_gui)
         self.import_btn = tk.Button(master=self.master, 
                                     text="Import", width=41,
@@ -92,8 +84,7 @@ class Mapper:
                                     text="Export", width=41,
                                     height=1)
 
-        self.save_btn.place(x=1243, y=501)
-        self.cancel_btn.place(x=1416, y=501)
+        self.save_exit_btn.place(x=1243, y=501)
         self.import_btn.place(x=1243, y=552)
         self.export_btn.place(x=1243, y=586)
         
@@ -104,8 +95,7 @@ class Mapper:
         self.mp_frame.destroy()
         self.list_bx.destroy()
         self.sb.destroy()
-        self.save_btn.destroy()
-        self.cancel_btn.destroy()
+        self.save_exit_btn.destroy()
         self.import_btn.destroy()
         self.export_btn.destroy()
         self.mp_canvas.destroy()
@@ -115,10 +105,8 @@ class Mapper:
             btn.destroy()
         self.buttons.clear()
 
-        # Restore the main gui
+        # Restore the main gui and pass in the newly mapped buttons
         self.restore_function(self.mapped_buttons)
-        # self.restore_frm.pack()
-        # self.restore_cnv.pack()
 
         
     def map_btn(self, btn):
@@ -127,12 +115,14 @@ class Mapper:
 
     def place_btns(self):
         for indx, btn in enumerate(BUTTON_NAMES):
-            self.buttons.append(tk.Button(master=self.master, image=self.button_img,
-                                border=0, highlightthickness=0,bg="white", bd=0, 
-                                command=lambda b=btn: self.map_btn(b))
-                            )
+            self.buttons.append(
+                tk.Button(master=self.master, image=self.button_img,
+                        border=0, highlightthickness=0,bg="white", bd=0, 
+                        command=lambda b=btn: self.map_btn(b)
+                )
+            )
 
-            self.buttons[indx].place(x=BUTTON_LOCATIONS[btn][0], y=BUTTON_LOCATIONS[btn][1])
+            self.buttons[indx].place(x=BUTTON_LOCATIONS[btn][0], y=BUTTON_LOCATIONS[btn][1] - 20)
 
 
 

@@ -76,12 +76,6 @@ class Gui:
                 )
             )
 
-        # Testing image button
-        # self.test_btn = tk.Button(master=self.master, image=self.button,
-        #                          border=0, highlightthickness=0,
-        #                           bg="white", bd=0)
-        # self.test_btn.place(x=435, y=378)
-
         # Joystick / trigger drawing for debuging
         self.boxes = [
             # Joystick boxes
@@ -112,12 +106,6 @@ class Gui:
             self.canvas.create_rectangle(350, 345, 375, 355, fill="blue"),
             self.canvas.create_rectangle(350, 445, 375, 455, fill="blue"),
         ]'''
-
-
-        '''
-        DEBUG: XXX Getting mouse coordinates
-        '''        
-        #self.master.bind('<Motion>', self.motion)
 
 
     def processEvent(self):
@@ -178,50 +166,32 @@ class Gui:
         self.canvas.update_idletasks()
         self.canvas.update()
 
+    # Right click context menu
     def show_menu(self, event):
         try:
             self.menu.post(event.x_root, event.y_root)
         finally:
             self.menu.grab_release()
 
-        ''' DEBUG: 
-            XXX:
-            Getting mouse coordinates
-        
-    def motion(self, event):
-        x, y = event.x, event.y
-        print(f"({x}, {y})")
-    '''
-
     def gui_map(self):
+        '''
+        Hides the current canvas, frame, and disables the context menu,
+        then calls the mapper gui. 
+        '''
         # Disable context menu while in mapper
         self.master.unbind("<Button-3>")
-        '''
-        TODO
-            Hide all the images and send master window
-            to the mapper gui
-        '''
-        with get_resource("base.png") as img_fh:
-            self.base = ImageTk.PhotoImage(Image.open(img_fh))
+
+        # Grab the base image for the mapper gui background
+        with get_resource("base.png") as base_img:
+            self.base = ImageTk.PhotoImage(Image.open(base_img))
 
         self.canvas.forget()
         self.bt_frame.forget()
-
-
 
         self.map_gui = self.mapper.gui
         self.map_gui(self.master, self.base, 
                     self.button, self.restore_gui)
 
-
-        """def close_map(self):
-        self.map_frame.destroy()
-        self.list_bx.destroy()
-        self.sb.destroy()
-        self.save_btn.destroy()
-        self.cancel_btn.destroy()
-        self.import_btn.destroy()
-        self.export_btn.destroy()"""
 
     def cli_map(self):
         self.mapped_roles = self.mapper.cli() 
