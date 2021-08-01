@@ -2,7 +2,7 @@ import importlib.resources
 from os import read
 from tkinter.font import BOLD
 from smashbox_viewer.button_roles import BUTTON_ROLES
-from tkinter.constants import ANCHOR, BOTH, BOTTOM, CENTER, END, LEFT, NE, RIGHT, S, SE, SW, TOP, VERTICAL
+from tkinter.constants import END, LEFT
 from smashbox_viewer.mapper import Mapper
 import tkinter as tk
 
@@ -172,6 +172,7 @@ class Gui:
             self.menu.post(event.x_root, event.y_root)
         finally:
             self.menu.grab_release()
+
 
     def gui_map(self):
         '''

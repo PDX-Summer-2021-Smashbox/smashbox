@@ -1,11 +1,11 @@
 from smashbox_viewer.button_roles import BUTTON_ROLES
 from smashbox_viewer.button_locations import BUTTON_LOCATIONS, BUTTON_NAMES
-from tkinter.constants import ANCHOR, BOTH, BOTTOM, CENTER, END, LEFT, NE, RIGHT, S, SE, SW, TOP, VERTICAL
+from tkinter.constants import BOTH, CENTER, END, LEFT, RIGHT, VERTICAL
 
 import tkinter as tk
 import json
 
-from PIL import Image, ImageFont, ImageDraw
+# from PIL import Image, ImageFont, ImageDraw
 
 class Mapper:
     '''
@@ -13,35 +13,12 @@ class Mapper:
     Two options to use this class; 1) CLI
                                    2) GUI
 
-    The cli will return the mapped button dictionary
-
-    TODO
-        Make sure everything created is destroyed
-        Clean up code a bit  
-        GUI client                             
+    The cli and gui will return the mapped button dictionary
     '''
     def __init__(self):
         self.mapped_buttons = {}
         self.buttons = []
         
-    def verify_input(self, button):
-        map_index = -1
-        while not int(map_index) in range(len(BUTTON_ROLES)):
-            index = input(f"Set {button} to index: ")
-            map_index = index if index.isdigit() else -1
-
-        return int(map_index)
-
-    def cli(self):
-        print("INDEX    BUTTON ROLE")
-        for indx, role in enumerate(BUTTON_ROLES):
-            print(f"{indx}    |  {role}")
-        
-        for button in BUTTON_NAMES:
-            map_index = self.verify_input(button)
-            self.mapped_buttons[button] = BUTTON_ROLES[map_index]
-        
-        return self.mapped_buttons
 
     def gui(self, master, background, button_img, rst_func):
         self.master = master
@@ -109,18 +86,27 @@ class Mapper:
         # Restore the main gui and pass in the newly mapped buttons
         self.restore_function(self.mapped_buttons)
 
-    def export_mapped(self):
-        json_export = json.dumps(self.mapped_buttons, indent=4)
-        export_file = open("mapped.json", "w")
-        export_file.write(json_export)
 
-    def import_mapped(self):
-        with open("mapped.json", "r") as import_file:
-            #json_file = json.loads(import_file)
-            self.mapped_buttons = json.load(import_file)
+    def cli(self):
+        print("INDEX    BUTTON ROLE")
+        for indx, role in enumerate(BUTTON_ROLES):
+            print(f"{indx}    |  {role}")
+        
+        for button in BUTTON_NAMES:
+            map_index = self.verify_input(button)
+            self.mapped_buttons[button] = BUTTON_ROLES[map_index]
+        
+        return self.mapped_buttons
 
-        print(self.mapped_buttons)
+    def verify_input(self, button):
+        map_index = -1
+        while not int(map_index) in range(len(BUTTON_ROLES)):
+            index = input(f"Set {button} to index: ")
+            map_index = index if index.isdigit() else -1
 
+        return int(map_index)
+
+    
     def map_btn(self, btn):
         self.mapped_buttons[btn] = self.list_bx.get(self.list_bx.curselection())
         print(self.mapped_buttons)
@@ -136,6 +122,16 @@ class Mapper:
 
             self.buttons[indx].place(x=BUTTON_LOCATIONS[btn][0], y=BUTTON_LOCATIONS[btn][1] - 20)
 
+
+    def export_mapped(self):
+        with open("mapped.json", "w") as export_file:
+            export_file.write(json.dumps(self.mapped_buttons, indent=4))
+
+    def import_mapped(self):
+        with open("mapped.json", "r") as import_file:
+            self.mapped_buttons = json.load(import_file)
+
+        print(self.mapped_buttons)
 
 
 # Testing

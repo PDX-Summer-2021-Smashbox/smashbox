@@ -1,17 +1,9 @@
 {
-    "Button_15": "C_Stick_Down_Right",
-    "Button_16": "C_Stick_Down_Right",
-    "Button_17": "C_Stick_Down_Right",
-    "Button_18": "C_Stick_Down_Right",
-    "Button_14": "C_Stick_Up",
-    "Button_13": "C_Stick_Up",
-    "Button_12": "C_Stick_Up",
-    "Button_11": "C_Stick_Up",
-    "Button_25": "Modifier_X_1",
-    "Button_26": "Modifier_X_1",
-    "Button_23": "Modifier_X_1",
-    "Button_22": "Trigger_Light_L",
-    "Button_20": "Trigger_Light_L",
-    "Button_21": "Trigger_Light_L",
-    "Button_19": "Trigger_Light_L"
+    "Button_18": "Button_A",
+    "Button_14": "Button_A",
+    "Button_13": "Button_A",
+    "Button_12": "Button_A",
+    "Button_11": "Button_A",
+    "Button_15": "Button_A",
+    "Button_16": "Button_A"
 }
