@@ -3,6 +3,7 @@ from smashbox_viewer.button_locations import BUTTON_LOCATIONS, BUTTON_NAMES
 from tkinter.constants import ANCHOR, BOTH, BOTTOM, CENTER, END, LEFT, NE, RIGHT, S, SE, SW, TOP, VERTICAL
 
 import tkinter as tk
+import json
 
 from PIL import Image, ImageFont, ImageDraw
 
@@ -79,10 +80,10 @@ class Mapper:
                                     height=1, command=self.close_gui)
         self.import_btn = tk.Button(master=self.master, 
                                     text="Import", width=41,
-                                    height=1)
+                                    height=1, command=self.import_mapped)
         self.export_btn = tk.Button(master=self.master,
                                     text="Export", width=41,
-                                    height=1)
+                                    height=1, command=self.export_mapped)
 
         self.save_exit_btn.place(x=1243, y=501)
         self.import_btn.place(x=1243, y=552)
@@ -108,7 +109,18 @@ class Mapper:
         # Restore the main gui and pass in the newly mapped buttons
         self.restore_function(self.mapped_buttons)
 
-        
+    def export_mapped(self):
+        json_export = json.dumps(self.mapped_buttons, indent=4)
+        export_file = open("mapped.json", "w")
+        export_file.write(json_export)
+
+    def import_mapped(self):
+        with open("mapped.json", "r") as import_file:
+            #json_file = json.loads(import_file)
+            self.mapped_buttons = json.load(import_file)
+
+        print(self.mapped_buttons)
+
     def map_btn(self, btn):
         self.mapped_buttons[btn] = self.list_bx.get(self.list_bx.curselection())
         print(self.mapped_buttons)
