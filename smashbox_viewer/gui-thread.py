@@ -1,13 +1,11 @@
 import importlib.resources
 from os import read
-from tkinter.font import BOLD
-from smashbox_viewer.button_roles import BUTTON_ROLES
-from tkinter.constants import END, LEFT
+
 from smashbox_viewer.mapper import Mapper
 import tkinter as tk
 
 from PIL import ImageTk, Image
-import threading, queue, pygame, sys
+import threading, queue, pygame
 
 
 from smashbox_viewer.event_gen import EventGenerator
@@ -35,28 +33,34 @@ class Gui:
     need a data structure to track location, button image, pressed image.
     """
 
-    def __init__(self, master, queue, end):
+    def __init__(self, master, device):
         self.master = master
-        self.queue = queue
+        self.device = device
+        self.running = True
+        self.queue = queue.Queue()
         self.buttons = []
-        self.mapper = Mapper()
 
-        master.title("Smashbox Viewer")
-
-        self.master.protocol("WM_DELETE_WINDOW", END)
-
+        self.master.title("Smashbox Viewer")
+        self.master.geometry()
         self.master.resizable(False, False)
 
-        self.bt_frame = tk.Frame(master=self.master)
-        self.bt_frame.pack()
-        self.canvas = tk.Canvas(self.bt_frame, width=1219, height=624)
-        self.canvas.pack()
+        self.master.protocol("WM_DELETE_WINDOW", self.end)
 
-        # Right click context menu
-        self.menu = tk.Menu(master=self.bt_frame, tearoff=False)
-        self.menu.add_command(label="mapper gui", command=self.gui_map)
-        self.menu.add_command(label="mapper cli", command=self.cli_map)
-        master.bind("<Button-3>", self.show_menu)
+        self.menu_frame = tk.Frame(master=self.master)
+        self.menu_frame.pack()
+
+        self.map_btn = tk.Button(self.menu_frame, text='Mapping', command=self.open_map)
+        self.map_btn.pack(side=tk.LEFT)
+
+        self.menu = tk.StringVar(self.menu_frame)
+        self.menu.set("Skin")
+        self.select = tk.OptionMenu(self.menu_frame, self.menu, "one", "two")
+        self.select.pack(side=tk.LEFT)
+
+        self.btn_frame = tk.Frame(master=self.master)
+        self.btn_frame.pack()
+        self.canvas = tk.Canvas(self.btn_frame, width=1219, height=624)
+        self.canvas.pack()
 
         with get_resource("base-unmapped.png") as img_fh:
             self.background = ImageTk.PhotoImage(Image.open(img_fh))
@@ -66,6 +70,8 @@ class Gui:
 
         with get_resource("A.png") as img_fh:
             self.pressed = ImageTk.PhotoImage(Image.open(img_fh))
+
+        self.vis_thread()
 
         self.canvas.create_image(0, 0, anchor="nw", image=self.background)
 
@@ -106,12 +112,14 @@ class Gui:
             self.canvas.create_rectangle(350, 345, 375, 355, fill="blue"),
             self.canvas.create_rectangle(350, 445, 375, 455, fill="blue"),
         ]
-
-    def processEvent(self):
-        while self.queue.qsize():
-            event = self.queue.get(0)
-            self.update(event)
-
+    
+    def open_map(self):
+        mapper = Mapper()
+        root = tk.Tk()
+        root.geometry(f"1219x624+{self.master.winfo_x()}+{self.master.winfo_y()}")
+        mapper.gui(root)
+        root.mainloop()
+        
     """
     Takes tuple events from the Eventgenerator and changes images
     for button changes, moves joystick and trigger shapes on axis
@@ -121,7 +129,7 @@ class Gui:
     to get proper images
     """
 
-    def update(self, diff):
+    def vis_update(self, diff):
         if "Button" in diff[0]:
             key = diff[0].split("n")
             num = int(key[1]) + 1
@@ -163,7 +171,6 @@ class Gui:
             loc[3] = loc[1] + 10
             self.canvas.coords(self.triggers[3], loc)
 
-        self.canvas.update_idletasks()
         self.canvas.update()
 
     # Right click context menu
@@ -172,67 +179,32 @@ class Gui:
             self.menu.post(event.x_root, event.y_root)
         finally:
             self.menu.grab_release()
+  
+    def process_event(self):
+        while self.queue.qsize():
+            event = self.queue.get(0)
+            self.vis_update(event)
 
-    def gui_map(self):
-        """
-        Hides the current canvas, frame, and disables the context menu,
-        then calls the mapper gui.
-        """
-        # Disable context menu while in mapper
-        self.master.unbind("<Button-3>")
+    def vis_thread(self):
+        self.t1 = threading.Thread(target=self.run_vis)
+        self.t1.setDaemon(True)
+        self.t1.start()
 
-        # Grab the base image for the mapper gui background
-        with get_resource("base.png") as base_img:
-            self.base = ImageTk.PhotoImage(Image.open(base_img))
-
-        self.canvas.forget()
-        self.bt_frame.forget()
-
-        self.map_gui = self.mapper.gui
-        self.map_gui(self.master, self.base, self.button, self.restore_gui)
-
-    def cli_map(self):
-        self.mapped_roles = self.mapper.cli()
-        print(self.mapped_roles)
-
-    # Restore the canvas, frame, and context menu
-    def restore_gui(self, mapped_btns):
-        self.bt_frame.pack()
-        self.canvas.pack()
-
-        self.master.bind("<Button-3>", self.show_menu)
-        self.mapped_roles = mapped_btns
-        print(self.mapped_roles)
-
-
-class ThreadClient:
-    def __init__(self, master, device):
-        self.master = master
-        self.device = device
-        self.queue = queue.Queue()
-        self.gui = Gui(master, self.queue, self.end)
-        self.gui.canvas.update()
-        self.running = 1
-        self.t1 = threading.Thread(target=self.runVis).start()
-
-        self.eventCall()
-
-    def eventCall(self):
-        self.gui.processEvent()
+    def event_call(self):
+        self.process_event()
         if not self.running:
             self.master.destroy()
-            sys.exit()
-        self.master.after(0, self.eventCall)
+        else:
+            self.master.after(1//DEVICE_HZ, self.event_call)
 
-    def runVis(self):
+    def run_vis(self):
+        self.event_call()
         for event in EventGenerator(self.device):
-            if not self.running:
-                sys.exit()
             self.queue.put(event)
             print(event)
 
     def end(self):
-        self.running = 0
+        self.running = False
 
 
 # Testing program
@@ -245,7 +217,7 @@ def main():
     device.joystick.init()
 
     root = tk.Tk()
-    gui = ThreadClient(root, device)
+    gui = Gui(root, device)
     root.mainloop()
 
 
