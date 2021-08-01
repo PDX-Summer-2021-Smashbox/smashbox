@@ -57,7 +57,7 @@ class Gui:
         self.bt_frame.pack(side=LEFT)
         self.canvas = tk.Canvas(self.bt_frame, width=1219, height=624)
         self.canvas.pack()
-        
+
         with get_resource("base-unmapped.png") as img_fh:
             self.background = ImageTk.PhotoImage(Image.open(img_fh))
 
@@ -91,7 +91,7 @@ class Gui:
             345,
             self.canvas.create_oval(245, 345, 255, 355, fill="grey", outline="black"),
         ]
-        '''
+        """
         # Stick two center locations, and oval
         self.stick2 = [
             245,
@@ -105,8 +105,7 @@ class Gui:
             450,
             self.canvas.create_rectangle(350, 345, 375, 355, fill="blue"),
             self.canvas.create_rectangle(350, 445, 375, 455, fill="blue"),
-        ]'''
-
+        ]"""
 
     def processEvent(self):
         while self.queue.qsize():
@@ -121,6 +120,7 @@ class Gui:
     TODO: once mapping is handled will need to handle buttons individually
     to get proper images
     """
+
     def update(self, diff):
         if "Button" in diff[0]:
             key = diff[0].split("n")
@@ -173,12 +173,11 @@ class Gui:
         finally:
             self.menu.grab_release()
 
-
     def gui_map(self):
-        '''
+        """
         Hides the current canvas, frame, and disables the context menu,
-        then calls the mapper gui. 
-        '''
+        then calls the mapper gui.
+        """
         # Disable context menu while in mapper
         self.master.unbind("<Button-3>")
 
@@ -190,14 +189,11 @@ class Gui:
         self.bt_frame.forget()
 
         self.map_gui = self.mapper.gui
-        self.map_gui(self.master, self.base, 
-                    self.button, self.restore_gui)
-
+        self.map_gui(self.master, self.base, self.button, self.restore_gui)
 
     def cli_map(self):
-        self.mapped_roles = self.mapper.cli() 
+        self.mapped_roles = self.mapper.cli()
         print(self.mapped_roles)
-
 
     # Restore the canvas, frame, and context menu
     def restore_gui(self, mapped_btns):
