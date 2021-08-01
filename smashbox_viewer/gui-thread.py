@@ -117,7 +117,7 @@ class Gui:
         '''
         DEBUG: XXX Getting mouse coordinates
         '''        
-        self.master.bind('<Motion>', self.motion)
+        #self.master.bind('<Motion>', self.motion)
 
 
     def processEvent(self):
@@ -194,6 +194,8 @@ class Gui:
     '''
 
     def gui_map(self):
+        # Disable context menu while in mapper
+        self.master.unbind("<Button-3>")
         '''
         TODO
             Hide all the images and send master window
@@ -204,69 +206,35 @@ class Gui:
 
         self.canvas.forget()
         self.bt_frame.forget()
+
+
+
         self.map_gui = self.mapper.gui
-        self.map_gui(self.master, self.base, self.button)
-        #self.bt_frame.pack()
-        #self.canvas.pack()
-
-        """ self.mp_frame = tk.Frame(master=self.master)
-        self.mp_frame.pack()
-        self.mp_canvas = tk.Canvas(self.mp_frame, width=1560, height=624)
-        self.mp_canvas.pack()
-
-        self.mp_canvas.create_image(0,0, anchor="nw", image=self.background)
+        self.map_gui(self.master, self.base, 
+                    self.button, self.restore_gui)
 
 
-        #self.bt_frame.pack_forget()
-        self.canvas.configure(width=1560, height=624)
-
-        self.map_frame = tk.Frame(master=self.master)
-        self.map_frame.place(x=1224, y=1)
-
-        self.list_bx = tk.Listbox(master=self.map_frame, width=53, height=30)
-        self.list_bx.pack(side=LEFT)
-
-        self.sb = tk.Scrollbar(master=self.map_frame, orient=VERTICAL)
-        self.sb.pack(side=RIGHT, fill=BOTH)
-
-        self.list_bx.configure(yscrollcommand=self.sb.set, justify=CENTER)
-        self.sb.config(command=self.list_bx.yview)
-
-        for btn in BUTTON_ROLES:
-           self.list_bx.insert(END, btn)
-
-        # Add the mapping buttons
-        self.save_btn = tk.Button(master=self.master,
-                                    text="Set", width=16,
-                                    height=1)
-        self.cancel_btn = tk.Button(master=self.master,
-                                    text="Cancel", width=16,
-                                    height=1, command=self.close_map)
-        self.import_btn = tk.Button(master=self.master, 
-                                    text="Import", width=41,
-                                    height=1)
-        self.export_btn = tk.Button(master=self.master,
-                                    text="Export", width=41,
-                                    height=1)
-
-        self.save_btn.place(x=1243, y=501)
-        self.cancel_btn.place(x=1416, y=501)
-        self.import_btn.place(x=1243, y=552)
-        self.export_btn.place(x=1243, y=586) """ 
-
-
-    def close_map(self):
+        """def close_map(self):
         self.map_frame.destroy()
         self.list_bx.destroy()
         self.sb.destroy()
         self.save_btn.destroy()
         self.cancel_btn.destroy()
         self.import_btn.destroy()
-        self.export_btn.destroy()
-        self.canvas.configure(width=1219, height=624)
+        self.export_btn.destroy()"""
 
     def cli_map(self):
         self.mapped_roles = self.mapper.cli() 
+        print(self.mapped_roles)
+
+
+    # Restore the canvas, frame, and context menu
+    def restore_gui(self, mapped_btns):
+        self.bt_frame.pack()
+        self.canvas.pack()
+
+        self.master.bind("<Button-3>", self.show_menu)
+        self.mapped_roles = mapped_btns
         print(self.mapped_roles)
 
 

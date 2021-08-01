@@ -15,6 +15,7 @@ class Mapper:
     The cli will return the mapped button dictionary
 
     TODO
+        Make sure everything created is destroyed
         Clean up code a bit  
         GUI client                             
     '''
@@ -29,7 +30,7 @@ class Mapper:
             map_index = index if index.isdigit() else -1
 
         return int(map_index)
- 
+
     def cli(self):
         print("INDEX    BUTTON ROLE")
         for indx, role in enumerate(BUTTON_ROLES):
@@ -41,23 +42,26 @@ class Mapper:
         
         return self.mapped_buttons
 
-    def gui(self, master, background, button_img):
+    def gui(self, master, background, button_img, rst_func):
         self.master = master
         self.button_img = button_img
+
+        #self.restore_cnv = rstr_canvas
+        #self.restore_frm = rstr_frame
+        self.restore_function = rst_func
+
+        # Disable context menu while in mapper
+        # self.master.unbind("<Button-3>")
+
         self.mp_frame = tk.Frame(master=self.master)
         self.mp_frame.pack()
-        self.mp_canvas = tk.Canvas(self.mp_frame, width=1219, height=624)
+        self.mp_canvas = tk.Canvas(self.mp_frame, width=1560, height=624)
         self.mp_canvas.pack()
 
         self.mp_canvas.create_image(0,0, anchor="nw", image=background)
-        self.place_btns()
-
-
-        #self.bt_frame.pack_forget()
-        self.mp_canvas.configure(width=1560, height=624)
 
         # place the buttons
-        #self.place_btns()
+        self.place_btns()
 
         self.map_frame = tk.Frame(master=self.master)
         self.map_frame.place(x=1224, y=1)
@@ -94,8 +98,10 @@ class Mapper:
         self.export_btn.place(x=1243, y=586)
         
 
+    # Destroy all the mapper controls
     def close_gui(self):
         self.map_frame.destroy()
+        self.mp_frame.destroy()
         self.list_bx.destroy()
         self.sb.destroy()
         self.save_btn.destroy()
@@ -104,20 +110,29 @@ class Mapper:
         self.export_btn.destroy()
         self.mp_canvas.destroy()
 
+        # Destroy the buttons
+        for btn in self.buttons:
+            btn.destroy()
+        self.buttons.clear()
+
+        # Restore the main gui
+        self.restore_function(self.mapped_buttons)
+        # self.restore_frm.pack()
+        # self.restore_cnv.pack()
+
+        
     def map_btn(self, btn):
         self.mapped_buttons[btn] = self.list_bx.get(self.list_bx.curselection())
         print(self.mapped_buttons)
 
-
     def place_btns(self):
         for indx, btn in enumerate(BUTTON_NAMES):
-            self.buttons.append(tk.Button(self.master, image=self.button_img,
+            self.buttons.append(tk.Button(master=self.master, image=self.button_img,
                                 border=0, highlightthickness=0,bg="white", bd=0, 
                                 command=lambda b=btn: self.map_btn(b))
                             )
 
             self.buttons[indx].place(x=BUTTON_LOCATIONS[btn][0], y=BUTTON_LOCATIONS[btn][1])
-
 
 
 
