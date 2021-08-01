@@ -76,6 +76,12 @@ class Gui:
                 )
             )
 
+        # Testing image button
+        # self.test_btn = tk.Button(master=self.master, image=self.button,
+        #                          border=0, highlightthickness=0,
+        #                           bg="white", bd=0)
+        # self.test_btn.place(x=435, y=378)
+
         # Joystick / trigger drawing for debuging
         self.boxes = [
             # Joystick boxes
@@ -181,19 +187,37 @@ class Gui:
         ''' DEBUG: 
             XXX:
             Getting mouse coordinates
-        '''
+        
     def motion(self, event):
         x, y = event.x, event.y
         print(f"({x}, {y})")
-    
+    '''
 
     def gui_map(self):
         '''
         TODO
-            Make list_bx move with gui
-            Extend only one side of window?
-            Clean up gui, make it look fancy
+            Hide all the images and send master window
+            to the mapper gui
         '''
+        with get_resource("base.png") as img_fh:
+            self.base = ImageTk.PhotoImage(Image.open(img_fh))
+
+        self.canvas.forget()
+        self.bt_frame.forget()
+        self.map_gui = self.mapper.gui
+        self.map_gui(self.master, self.base, self.button)
+        #self.bt_frame.pack()
+        #self.canvas.pack()
+
+        """ self.mp_frame = tk.Frame(master=self.master)
+        self.mp_frame.pack()
+        self.mp_canvas = tk.Canvas(self.mp_frame, width=1560, height=624)
+        self.mp_canvas.pack()
+
+        self.mp_canvas.create_image(0,0, anchor="nw", image=self.background)
+
+
+        #self.bt_frame.pack_forget()
         self.canvas.configure(width=1560, height=624)
 
         self.map_frame = tk.Frame(master=self.master)
@@ -228,7 +252,8 @@ class Gui:
         self.save_btn.place(x=1243, y=501)
         self.cancel_btn.place(x=1416, y=501)
         self.import_btn.place(x=1243, y=552)
-        self.export_btn.place(x=1243, y=586)
+        self.export_btn.place(x=1243, y=586) """ 
+
 
     def close_map(self):
         self.map_frame.destroy()
