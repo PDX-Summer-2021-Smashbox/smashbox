@@ -212,7 +212,9 @@ class ThreadClient:
         self.gui = Gui(master, self.queue, self.end)
         self.gui.canvas.update()
         self.running = 1
-        self.t1 = threading.Thread(target=self.runVis).start()
+        self.t1 = threading.Thread(target=self.runVis)
+        self.t1.daemon = True
+        self.t1.start()
 
         self.eventCall()
 
