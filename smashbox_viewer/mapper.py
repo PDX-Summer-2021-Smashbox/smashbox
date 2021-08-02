@@ -21,6 +21,10 @@ class Mapper:
     def __init__(self):
         self.mapped_buttons = {}
         self.buttons = []
+        self.done = False
+
+    def end(self):
+        self.master.destroy()
 
     def gui(self, master, x, y):
         self.master = master
@@ -30,6 +34,7 @@ class Mapper:
         #self.button_img = button_img
 
         #self.restore_function = rst_func
+        self.master.protocol("WM_DELETE_WINDOW", self.end)
 
         self.mp_frame = tk.Frame(master=self.master)
         self.mp_frame.pack()
@@ -84,6 +89,7 @@ class Mapper:
         self.import_btn.place(x=1243, y=552)
         self.export_btn.place(x=1243, y=586)
 
+
     # Destroy all the mapper controls
     def close_gui(self):
         self.map_frame.destroy()
@@ -103,6 +109,7 @@ class Mapper:
         # Restore the main gui and pass in the newly mapped buttons
         # export the mapped buttons
         self.export_mapped()
+        self.done = True
         self.master.destroy()
         #self.open_new_window(self.master)
         #self.restore_function(self.mapped_buttons)
@@ -172,6 +179,12 @@ class Mapper:
         test_canvas.pack()
         label = tk.Label(master, text="new window")
         label.place(x=100, y=100)
+
+    def is_done(self):
+        return self.done
+
+    def reset_done(self):
+        self.done = False
 
 
 # Testing

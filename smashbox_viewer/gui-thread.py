@@ -49,7 +49,7 @@ class Gui:
         self.menu_frame = tk.Frame(master=self.master)
         self.menu_frame.pack()
 
-        self.map_btn = tk.Button(self.menu_frame, text='Mapping', command=self.open_map)
+        self.map_btn = tk.Button(self.menu_frame, text='Mapping', command=self.insert_map)
         self.map_btn.pack(side=tk.LEFT)
 
         self.menu = tk.StringVar(self.menu_frame)
@@ -112,13 +112,27 @@ class Gui:
             self.canvas.create_rectangle(350, 345, 375, 355, fill="blue"),
             self.canvas.create_rectangle(350, 445, 375, 455, fill="blue"),
         ]
-    
+
+    def insert_map(self):
+        map_event = "mapper"
+        print("injecting mapper")
+        self.queue.put(map_event) 
+
     def open_map(self):
-        mapper = Mapper()
+        #map_event = "mapper"
+        #self.queue.put(map_event)
+        self.mapper = Mapper()
         root = tk.Tk()
         #root.geometry(f"1219x624+{self.master.winfo_x()}+{self.master.winfo_y()}")
-        mapper.gui(root, root.winfo_x(), root.winfo_y())
-        root.mainloop()
+        self.mapper.gui(root, root.winfo_x(), root.winfo_y())
+        while(True):
+            root.update_idletasks()
+            root.update()
+            if self.mapper.done:
+                print(self.mapper.done)
+                self.mapper.reset_done()
+                break
+        print("open map ended")
         
     """
     Takes tuple events from the Eventgenerator and changes images
@@ -183,6 +197,15 @@ class Gui:
     def process_event(self):
         while self.queue.qsize():
             event = self.queue.get(0)
+            print(event) 
+            if isinstance(event, str): # if the event is "mapper"
+                self.open_map()
+                #while(True):
+                #    if self.mapper.is_done:
+                #        break
+                #self.mapper.reset_done
+                #print("reset done")
+
             self.vis_update(event)
 
     def vis_thread(self):
@@ -200,8 +223,9 @@ class Gui:
     def run_vis(self):
         self.event_call()
         for event in EventGenerator(self.device):
-            self.queue.put(event)
-            print(event)
+            if event:
+                self.queue.put(event)
+                print(event)
 
     def end(self):
         self.running = False
