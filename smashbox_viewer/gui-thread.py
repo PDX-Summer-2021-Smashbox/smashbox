@@ -4,6 +4,7 @@ import tkinter as tk
 from PIL import ImageTk, Image
 import threading, queue, pygame, sys
 
+from smashbox_viewer.mapper import Mapper
 from smashbox_viewer.event_gen import EventGenerator
 from smashbox_viewer.button_locations import BUTTON_LOCATIONS
 from smashbox_viewer.poller import *
