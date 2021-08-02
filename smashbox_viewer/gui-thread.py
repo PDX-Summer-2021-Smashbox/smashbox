@@ -112,9 +112,9 @@ class Gui:
         # Hide visualizer
         self.master.withdraw()
 
-        root = tk.Toplevel() 
+        root = tk.Toplevel()
         self.mapper.gui(root, self.base, self.button)
-        while(True):
+        while True:
             root.update_idletasks()
             root.update()
             if self.mapper.done:
@@ -185,7 +185,6 @@ class Gui:
 
         self.canvas.update_idletasks()
         self.canvas.update()
-
 
     # Right click context menu
     def show_menu(self, event):

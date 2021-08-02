@@ -5,6 +5,7 @@ from tkinter.constants import BOTH, CENTER, END, LEFT, RIGHT, VERTICAL
 import tkinter as tk
 import json
 
+
 class Mapper:
     """
     Class to map the buttons to their roles.
@@ -20,20 +21,19 @@ class Mapper:
         self.buttons = []
         self.done = False
 
-
     def gui(self, master, background, button_img):
         self.master = master
         self.button_img = button_img
 
-        #self.master.protocol("WM_DELETE_WINDOW", self.end)
+        # self.master.protocol("WM_DELETE_WINDOW", self.end)
 
         self.mp_frame = tk.Frame(master=self.master)
         self.mp_frame.pack()
         self.mp_canvas = tk.Canvas(self.mp_frame, width=1560, height=624)
-        #self.master.geometry(f"1560x624+{x}+{y}")
+        # self.master.geometry(f"1560x624+{x}+{y}")
         self.mp_canvas.pack()
 
-        self.mp_canvas.create_image(0,0, anchor="nw", image=background)
+        self.mp_canvas.create_image(0, 0, anchor="nw", image=background)
 
         # place the buttons
         self.place_btns()
@@ -80,7 +80,6 @@ class Mapper:
         self.import_btn.place(x=1243, y=552)
         self.export_btn.place(x=1243, y=586)
 
-
     # Destroy all the mapper controls
     def close_gui(self):
         self.map_frame.destroy()
@@ -126,7 +125,6 @@ class Mapper:
     def map_btn(self, btn):
         self.mapped_buttons[btn] = self.list_bx.get(self.list_bx.curselection())
         print(self.mapped_buttons)
-
 
     def place_btns(self):
         for indx, btn in enumerate(BUTTON_NAMES):
