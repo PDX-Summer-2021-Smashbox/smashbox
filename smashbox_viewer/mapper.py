@@ -25,12 +25,9 @@ class Mapper:
         self.master = master
         self.button_img = button_img
 
-        # self.master.protocol("WM_DELETE_WINDOW", self.end)
-
         self.mp_frame = tk.Frame(master=self.master)
         self.mp_frame.pack()
         self.mp_canvas = tk.Canvas(self.mp_frame, width=1560, height=624)
-        # self.master.geometry(f"1560x624+{x}+{y}")
         self.mp_canvas.pack()
 
         self.mp_canvas.create_image(0, 0, anchor="nw", image=background)

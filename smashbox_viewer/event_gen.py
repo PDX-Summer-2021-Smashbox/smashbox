@@ -15,11 +15,6 @@ class EventGenerator:
     """
     Wrapper around a Device that monitors for differences in frames.
     Any differences in frames will result in an Event.
-
-    This wrapper also produces "heartbeats" which are intended to be ignored.
-    These heartbeats are implemented as None. The point of this is to allow
-    for the EventGenerator to be iterated over without hanging when there isn't
-    any actual output.
     """
 
     def __init__(self, device, *, axis_tolerance=DEFAULT_AXIS_TOLERANCE):
@@ -64,6 +59,7 @@ def diff_frames(f1, f2, *, axis_tolerance=DEFAULT_AXIS_TOLERANCE):
     have a difference of 1 or more when they change state.
     """
     return (
-        (k, v) if diff_elem(f1[k], v, axis_tolerance=axis_tolerance) else None
+        (k, v)
         for k, v in f2.items()
+        if diff_elem(f1[k], v, axis_tolerance=axis_tolerance)
     )
