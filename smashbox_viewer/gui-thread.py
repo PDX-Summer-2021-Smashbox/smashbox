@@ -42,7 +42,7 @@ class Gui:
         self.master.protocol("WM_DELETE_WINDOW", end)
         self.master.resizable(False, False)
 
-        '''
+        """
         self.menu_frame = tk.Frame(master=self.master)
         self.menu_frame.pack()
 
@@ -50,7 +50,7 @@ class Gui:
         self.menu.set("Select")
         self.select = tk.OptionMenu(self.menu_frame, self.menu, "one", "two")
         self.select.pack()
-        '''
+        """
 
         self.bt_frame = tk.Frame(master=self.master)
         self.bt_frame.pack()
@@ -195,14 +195,12 @@ class Gui:
         self.canvas.update_idletasks()
         self.canvas.update()
 
-
     # Right click context menu
     def show_menu(self, event):
         try:
             self.menu.post(event.x_root, event.y_root)
         finally:
             self.menu.grab_release()
-
 
 
 class ThreadClient:
