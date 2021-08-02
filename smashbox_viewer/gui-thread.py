@@ -4,7 +4,7 @@ import tkinter as tk
 from PIL import ImageTk, Image
 import threading, queue, pygame, sys
 
-
+from smashbox_viewer.mapper import Mapper
 from smashbox_viewer.event_gen import EventGenerator
 from smashbox_viewer.button_locations import BUTTON_LOCATIONS
 from smashbox_viewer.poller import *
@@ -35,10 +35,15 @@ class Gui:
         self.queue = queue
         self.buttons = []
 
+        self.mapper = Mapper()
+        self.mapped_btns = []
+
         master.title("Smashbox Viewer")
 
         self.master.protocol("WM_DELETE_WINDOW", end)
+        self.master.resizable(False, False)
 
+        """
         self.menu_frame = tk.Frame(master=self.master)
         self.menu_frame.pack()
 
@@ -46,19 +51,29 @@ class Gui:
         self.menu.set("Select")
         self.select = tk.OptionMenu(self.menu_frame, self.menu, "one", "two")
         self.select.pack()
+        """
 
         self.bt_frame = tk.Frame(master=self.master)
         self.bt_frame.pack()
         self.canvas = tk.Canvas(self.bt_frame, width=1219, height=624)
         self.canvas.pack()
 
+        # Right click context menu
+        self.menu = tk.Menu(master=self.master, tearoff=False)
+        self.menu.add_command(label="mapper gui", command=lambda: self.queue.put("map"))
+        self.menu.add_command(label="mapper cli", command=self.cli_map)
+        master.bind("<Button-3>", self.show_menu)
+
         with get_resource("base-unmapped.png") as img_fh:
             self.background = ImageTk.PhotoImage(Image.open(img_fh))
 
-        with get_resource("A-2.png") as img_fh:
+        with get_resource("base.png") as img_fh:
+            self.base = ImageTk.PhotoImage(Image.open(img_fh))
+
+        with get_resource("Button_A.png") as img_fh:
             self.button = ImageTk.PhotoImage(Image.open(img_fh))
 
-        with get_resource("A.png") as img_fh:
+        with get_resource("Button_A_Pressed.png") as img_fh:
             self.pressed = ImageTk.PhotoImage(Image.open(img_fh))
 
         self.canvas.create_image(0, 0, anchor="nw", image=self.background)
@@ -100,6 +115,25 @@ class Gui:
             self.canvas.create_rectangle(350, 445, 375, 455, fill="blue"),
         ]
 
+    def cli_map(self):
+        self.mapped_btns = self.mapper.cli()
+
+    def open_map(self):
+        # Hide visualizer
+        self.master.withdraw()
+
+        root = tk.Toplevel()
+        self.mapper.gui(root, self.base, self.button)
+        while True:
+            root.update_idletasks()
+            root.update()
+            if self.mapper.done:
+                self.mapper.reset_done()
+                break
+
+        # Bring back visualizer
+        self.master.deiconify()
+
     def processEvent(self):
         while self.queue.qsize():
             event = self.queue.get(0)
@@ -115,6 +149,9 @@ class Gui:
     """
 
     def update(self, diff):
+        if "map" in diff:
+            self.open_map()
+
         if "Button" in diff[0]:
             key = diff[0].split("n")
             num = int(key[1]) + 1
@@ -159,6 +196,13 @@ class Gui:
         self.canvas.update_idletasks()
         self.canvas.update()
 
+    # Right click context menu
+    def show_menu(self, event):
+        try:
+            self.menu.post(event.x_root, event.y_root)
+        finally:
+            self.menu.grab_release()
+
 
 class ThreadClient:
     def __init__(self, master, device):
@@ -168,7 +212,9 @@ class ThreadClient:
         self.gui = Gui(master, self.queue, self.end)
         self.gui.canvas.update()
         self.running = 1
-        self.t1 = threading.Thread(target=self.runVis).start()
+        self.t1 = threading.Thread(target=self.runVis)
+        self.t1.daemon = True
+        self.t1.start()
 
         self.eventCall()
 
@@ -176,13 +222,10 @@ class ThreadClient:
         self.gui.processEvent()
         if not self.running:
             self.master.destroy()
-            sys.exit()
         self.master.after(0, self.eventCall)
 
     def runVis(self):
         for event in EventGenerator(self.device):
-            if not self.running:
-                sys.exit()
             self.queue.put(event)
             print(event)
 
