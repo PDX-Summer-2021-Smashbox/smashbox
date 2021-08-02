@@ -4,18 +4,15 @@ from tkinter.constants import BOTH, CENTER, END, LEFT, RIGHT, VERTICAL
 
 import tkinter as tk
 import json
-import smashbox_viewer.gui 
 
-from PIL import Image, ImageTk, ImageFont, ImageDraw
-
-import smashbox_viewer.resources.skins.default as resources
 class Mapper:
     """
     Class to map the buttons to their roles.
     Two options to use this class; 1) CLI
                                    2) GUI
 
-    The cli and gui will return the mapped button dictionary
+    The cli will return the mapped button dictionary, then export it to mapped.json
+    The gui will save and export the mapped buttons
     """
 
     def __init__(self):
@@ -23,26 +20,20 @@ class Mapper:
         self.buttons = []
         self.done = False
 
-    def end(self):
-        self.master.destroy()
 
-    def gui(self, master, x, y):
+    def gui(self, master, background, button_img):
         self.master = master
-        #with smashbox_viewer.gui.get_resource("A-2.png") as img_fh:
-            #self.button_img = ImageTk.PhotoImage(Image.open(img_fh))
-        #smashbox_viewer.gui.get_resource()
-        #self.button_img = button_img
+        self.button_img = button_img
 
-        #self.restore_function = rst_func
-        self.master.protocol("WM_DELETE_WINDOW", self.end)
+        #self.master.protocol("WM_DELETE_WINDOW", self.end)
 
         self.mp_frame = tk.Frame(master=self.master)
         self.mp_frame.pack()
         self.mp_canvas = tk.Canvas(self.mp_frame, width=1560, height=624)
-        self.master.geometry(f"1560x624+{x}+{y}")
+        #self.master.geometry(f"1560x624+{x}+{y}")
         self.mp_canvas.pack()
 
-        #self.mp_canvas.create_image(0, 0, anchor="nw", image=background)
+        self.mp_canvas.create_image(0,0, anchor="nw", image=background)
 
         # place the buttons
         self.place_btns()
@@ -106,13 +97,10 @@ class Mapper:
             btn.destroy()
         self.buttons.clear()
 
-        # Restore the main gui and pass in the newly mapped buttons
-        # export the mapped buttons
+        # export the mapped buttons and destroy the mapper
         self.export_mapped()
         self.done = True
         self.master.destroy()
-        #self.open_new_window(self.master)
-        #self.restore_function(self.mapped_buttons)
 
     def cli(self):
         print("INDEX    BUTTON ROLE")
@@ -123,6 +111,7 @@ class Mapper:
             map_index = self.verify_input(button)
             self.mapped_buttons[button] = BUTTON_ROLES[map_index]
 
+        self.export_mapped()
         return self.mapped_buttons
 
     def verify_input(self, button):
@@ -133,19 +122,21 @@ class Mapper:
 
         return int(map_index)
 
+    # Gets the item selected from listbox and maps to the clicked btn
     def map_btn(self, btn):
         self.mapped_buttons[btn] = self.list_bx.get(self.list_bx.curselection())
         print(self.mapped_buttons)
+
 
     def place_btns(self):
         for indx, btn in enumerate(BUTTON_NAMES):
             self.buttons.append(
                 tk.Button(
                     master=self.master,
-                    #image=self.button_img,
+                    image=self.button_img,
                     border=0,
                     highlightthickness=0,
-                    bg="green",
+                    bg="white",
                     bd=0,
                     command=lambda b=btn: self.map_btn(b),
                 )
@@ -165,21 +156,7 @@ class Mapper:
 
         print(self.mapped_buttons)
 
-
-    def open_new_window(self, root):
-        master = tk.Tk()
-        master.title("new window")
-        master.geometry(f"1219x624+{root.winfo_x()}+{root.winfo_y()}")
-
-        root.destroy()
-
-        test_frame = tk.Frame(master=master)
-        test_frame.pack()
-        test_canvas = tk.Canvas(test_frame, width=1219, height=624)
-        test_canvas.pack()
-        label = tk.Label(master, text="new window")
-        label.place(x=100, y=100)
-
+    # Used for thread control
     def is_done(self):
         return self.done
 
