@@ -222,13 +222,10 @@ class ThreadClient:
         self.gui.processEvent()
         if not self.running:
             self.master.destroy()
-            sys.exit()
         self.master.after(0, self.eventCall)
 
     def runVis(self):
         for event in EventGenerator(self.device):
-            if not self.running:
-                sys.exit()
             self.queue.put(event)
             print(event)
 
