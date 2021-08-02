@@ -12,7 +12,10 @@ def test_time_delay_event_gen():
     gen = event_gen.EventGenerator(
         poller.TimeDelayMockPoller(consts.FAST_BUTTON_FRAMES, loop=True)
     )
-    assert list(itertools.islice(iter(gen), 2)) == [("Button0", 1), ("Button0", 0)]
+    assert list(itertools.islice(filter(bool, gen), 2)) == [
+        ("Button0", 1),
+        ("Button0", 0),
+    ]
 
 
 def test_sequential_event_gen():
@@ -23,7 +26,10 @@ def test_sequential_event_gen():
     gen = event_gen.EventGenerator(
         poller.SequentialMockPoller(consts.SIMPLE_BUTTON_FRAMES, loop=True)
     )
-    assert list(itertools.islice(iter(gen), 4)) == [("Button0", 1), ("Button0", 0)] * 2
+    assert (
+        list(itertools.islice(filter(bool, iter(gen)), 4))
+        == [("Button0", 1), ("Button0", 0)] * 2
+    )
 
 
 def test_frame_parser_event_gen():
@@ -37,7 +43,7 @@ def test_frame_parser_event_gen():
             consts.COMBINE_AXES_DICT,
         )
     )
-    assert list(iter(gen)) == [
+    assert list(filter(bool, iter(gen))) == [
         ("Joystick1", (0.5, 0)),
         ("Button0", 1),
         ("Joystick1", (1, 1)),
