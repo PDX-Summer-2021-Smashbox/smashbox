@@ -6,7 +6,7 @@ from . import consts
 
 
 def test_translator():
-    device = translator.Translator(
+    device = translator.RawTranslator(
         poller.SequentialMockPoller(consts.FRAME_PARSER_FRAMES),
         ["Button1", "Button2", "Button3", "Button4", "ModifierButton"],
         consts.CALIBRATION_DICT,
@@ -16,7 +16,7 @@ def test_translator():
 
 def test_translator_event_gen():
     device = event_gen.EventGenerator(
-        translator.Translator(
+        translator.RawTranslator(
             poller.SequentialMockPoller(consts.FRAME_PARSER_FRAMES),
             ["Button1", "Button2", "Button3", "Button4", "ModifierButton"],
             consts.CALIBRATION_DICT,

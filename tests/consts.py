@@ -24,16 +24,16 @@ COMBINE_AXES_DICT = {"Joystick1": ("Axis1", "Axis2")}
 
 CALIBRATION_DICT = {
     "Axis1": {
-        0.5: ["ModifierButton", "Button1"],
-        1: ["Button1"],
-        -0.5: ["ModifierButton", "Button2"],
-        -1: ["Button2"],
+        0.5: [["ModifierButton", "Button1"]],
+        1: [["Button1"]],
+        -0.5: [["ModifierButton", "Button2"]],
+        -1: [["Button2"]],
     },
     "Axis2": {
-        0.5: ["ModifierButton", "Button3"],
-        1: ["Button3"],
-        -0.5: ["ModifierButton", "Button4"],
-        -1: ["Button4"],
+        0.5: [["ModifierButton", "Button3"]],
+        1: [["Button3"]],
+        -0.5: [["ModifierButton", "Button4"]],
+        -1: [["Button4"]],
     },
 }
 
