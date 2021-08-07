@@ -7,13 +7,13 @@ A "calibration dictionary" is of the following form:
 
     {
         control_surface1 : {
-            state1: [button1],
-            state2: [button2, button3]
+            state1: [[button1]],
+            state2: [[button2, button3], [button4, button5]]
             # ...
         },
         control_surface2 : {
-            state3: [button3],
-            state4: [button4],
+            state3: [[button3]],
+            state4: [[button4]],
             # ...
         }
     }
@@ -25,21 +25,31 @@ import itertools
 
 """
 Given a button list, a calibration dictionary, and a frame, translate the frame into
-a translated frame of the buttons in the button list.
+a list of possible translated frames of the buttons in the button list.
 """
 
 
 def translate_frame(button_lst, calibration_dict, frame):
-    pressed_buttons = set(
-        itertools.chain.from_iterable(
-            calibration_dict[surface].get(frame[surface], [])
-            for surface in calibration_dict
-        )
+    pressed_possibilities = (
+        calibration_dict[surface].get(frame[surface], [[]])
+        for surface in calibration_dict
     )
-    return {button: int(button in pressed_buttons) for button in button_lst}
+    button_sets = (
+        set(itertools.chain.from_iterable(poss))
+        for poss in itertools.product(*pressed_possibilities)
+    )
+    return (
+        {button: int(button in button_set) for button in button_lst}
+        for button_set in button_sets
+    )
 
 
-class Translator:
+class QuasiTranslator:
+    """
+    Translator that produces a generator of possible frames every time the
+    device is polled.  Any non-singleton generator is an ambiguity.
+    """
+
     def __init__(self, device, button_lst, calibration_dict):
         self.device = device
         self.button_lst = button_lst
@@ -55,3 +65,13 @@ class Translator:
 
     def __next__(self):
         return self.poll()
+
+
+class RawTranslator(QuasiTranslator):
+    """
+    Translator that resolves ambiguity by picking the first of any possible
+    frames every time.
+    """
+
+    def poll(self):
+        return next(super().poll())
