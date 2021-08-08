@@ -23,6 +23,7 @@ A "calibration dictionary" is of the following form:
     A subdict is a singleton dictionary that contains one of these key-value pairs.
 """
 
+
 class Calibrator:
     def __init__(self):
         self.calibration = {}
@@ -87,14 +88,12 @@ class Calibrator:
 
         # Grabbing joystick zeros
         self.get_zero()
-        
+
         # Find axes, build sticks, assign dictionary values for full press
         for stick in self.sticknames:
             frames = self.build_frames(self.all_dirs, stick)
             self.build_stick(stick, frames)
         print(self.sticks)
-
-    
 
     def build_stick(self, stick, frames):
         diffs = dict(diff_frames(frames[0], frames[1]))
