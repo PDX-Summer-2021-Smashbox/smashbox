@@ -4,11 +4,12 @@ import tkinter as tk
 
 
 from PIL import ImageTk, Image
-import threading, queue, pygame
+import threading, queue, pygame, json
 
 from smashbox_viewer.mapper import Mapper
 from smashbox_viewer.calibrator import Calibrator
 from smashbox_viewer.event_gen import EventGenerator
+from smashbox_viewer.button_roles import BUTTON_ROLES
 from smashbox_viewer.button_locations import BUTTON_LOCATIONS
 from smashbox_viewer.poller import *
 import smashbox_viewer.resources.skins.default as resources
@@ -38,9 +39,12 @@ class Gui:
         self.queue = queue
         self.device = device
         self.buttons = []
+        self.btn_images = []
 
         self.mapper = Mapper()
-        self.mapped_btns = []
+        with open('mapped.json') as file:
+            self.mapped_btns = json.load(file)
+        print(self.mapped_btns) 
 
         self.calibrator = Calibrator()
         self.calibrate = False
@@ -79,21 +83,37 @@ class Gui:
         with get_resource("base.png") as img_fh:
             self.base = ImageTk.PhotoImage(Image.open(img_fh))
 
-        with get_resource("Button_A.png") as img_fh:
-            self.button = ImageTk.PhotoImage(Image.open(img_fh))
+        
 
-        with get_resource("Button_A_Pressed.png") as img_fh:
-            self.pressed = ImageTk.PhotoImage(Image.open(img_fh))
+        for btn in self.mapped_btns.values():
+            print(btn)
+            imgs = []
+            if btn == 'Button_Disabled':
+                with get_resource(f"Transparent.png") as img_fh:
+                    imgs.append(ImageTk.PhotoImage(Image.open(img_fh)))
+
+                with get_resource(f"Transparent.png") as img_fh:
+                    imgs.append(ImageTk.PhotoImage(Image.open(img_fh)))
+            
+            else:
+                with get_resource(f"{btn}.png") as img_fh:
+                    imgs.append(ImageTk.PhotoImage(Image.open(img_fh)))
+
+                with get_resource(f"{btn}_Pressed.png") as img_fh:
+                    imgs.append(ImageTk.PhotoImage(Image.open(img_fh)))
+
+            self.btn_images.append(imgs) 
 
         self.canvas.create_image(0, 0, anchor="nw", image=self.background)
 
-        for bt in BUTTON_LOCATIONS:
+        for btn,img in zip(BUTTON_LOCATIONS, self.btn_images):
             self.buttons.append(
                 self.canvas.create_image(
-                    BUTTON_LOCATIONS[bt][0], BUTTON_LOCATIONS[bt][1], image=self.button
+                    BUTTON_LOCATIONS[btn][0], BUTTON_LOCATIONS[btn][1], image=img[0]
                 )
             )
 
+        """
         # Joystick / trigger drawing for debuging
         self.boxes = [
             # Joystick boxes
@@ -123,6 +143,7 @@ class Gui:
             self.canvas.create_rectangle(350, 345, 375, 355, fill="blue"),
             self.canvas.create_rectangle(350, 445, 375, 455, fill="blue"),
         ]
+        """
 
     def cli_map(self):
         self.mapped_btns = self.mapper.cli()
@@ -199,10 +220,11 @@ class Gui:
             key = diff[0].split("n")
             num = int(key[1]) + 1
             if diff[1] == 1:
-                self.canvas.itemconfig(self.buttons[num], image=self.pressed)
+                self.canvas.itemconfig(self.buttons[num], image=self.btn_images[num][1])
             else:
-                self.canvas.itemconfig(self.buttons[num], image=self.button)
+                self.canvas.itemconfig(self.buttons[num], image=self.btn_images[num][0])
 
+        """
         # TODO - Once tranlastion is finished REMOVE all Axis monitoring
         if "Axis0" in diff[0]:
             loc = self.canvas.coords(self.stick1[2])
@@ -236,6 +258,7 @@ class Gui:
             loc[1] = diff[1] * 50 + self.triggers[1]
             loc[3] = loc[1] + 10
             self.canvas.coords(self.triggers[3], loc)
+        """
 
         self.canvas.update_idletasks()
         self.canvas.update()
