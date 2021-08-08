@@ -23,13 +23,12 @@ A "calibration dictionary" is of the following form:
 
 import itertools
 
-"""
-Given a button list, a calibration dictionary, and a frame, translate the frame into
-a list of possible translated frames of the buttons in the button list.
-"""
-
 
 def translate_frame(button_lst, calibration_dict, frame):
+    """
+    Given a button list, a calibration dictionary, and a frame, translate the frame into
+    a list of possible translated frames of the buttons in the button list.
+    """
     pressed_possibilities = (
         calibration_dict[surface].get(frame[surface], [[]])
         for surface in calibration_dict
