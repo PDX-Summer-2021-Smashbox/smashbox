@@ -42,9 +42,8 @@ class Gui:
         self.btn_images = []
 
         self.mapper = Mapper()
-        with open('mapped.json') as file:
+        with open("mapped.json") as file:
             self.mapped_btns = json.load(file)
-        print(self.mapped_btns) 
 
         self.calibrator = Calibrator()
         self.calibrate = False
@@ -83,18 +82,15 @@ class Gui:
         with get_resource("base.png") as img_fh:
             self.base = ImageTk.PhotoImage(Image.open(img_fh))
 
-        
-
         for btn in self.mapped_btns.values():
-            print(btn)
             imgs = []
-            if btn == 'Button_Disabled':
+            if btn == "Button_Disabled":
                 with get_resource(f"Transparent.png") as img_fh:
                     imgs.append(ImageTk.PhotoImage(Image.open(img_fh)))
 
                 with get_resource(f"Transparent.png") as img_fh:
                     imgs.append(ImageTk.PhotoImage(Image.open(img_fh)))
-            
+
             else:
                 with get_resource(f"{btn}.png") as img_fh:
                     imgs.append(ImageTk.PhotoImage(Image.open(img_fh)))
@@ -102,11 +98,11 @@ class Gui:
                 with get_resource(f"{btn}_Pressed.png") as img_fh:
                     imgs.append(ImageTk.PhotoImage(Image.open(img_fh)))
 
-            self.btn_images.append(imgs) 
+            self.btn_images.append(imgs)
 
         self.canvas.create_image(0, 0, anchor="nw", image=self.background)
 
-        for btn,img in zip(BUTTON_LOCATIONS, self.btn_images):
+        for btn, img in zip(BUTTON_LOCATIONS, self.btn_images):
             self.buttons.append(
                 self.canvas.create_image(
                     BUTTON_LOCATIONS[btn][0], BUTTON_LOCATIONS[btn][1], image=img[0]
