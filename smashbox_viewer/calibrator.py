@@ -156,7 +156,7 @@ class Calibrator:
         name = self.sticknames[0]
         if mode:
             frames = self.build_frames(
-                list(self.all_dirs.keys()), self.sticknames[1], [mode]
+                list(self.all_dirs.keys()), self.sticknames[1], ["Mode"]
             )
             self.build_states(self.sticknames[1], frames, self.all_dirs, [mode])
 
