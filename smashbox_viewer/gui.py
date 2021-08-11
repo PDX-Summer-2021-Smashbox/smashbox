@@ -1,18 +1,32 @@
 import importlib.resources
-
 import tkinter as tk
-
 
 from PIL import ImageTk, Image
 import threading, queue, pygame, json
 
 from smashbox_viewer.mapper import Mapper
 from smashbox_viewer.calibrator import Calibrator
+from smashbox_viewer.button_map import ButtonMapper
 from smashbox_viewer.event_gen import EventGenerator
-from smashbox_viewer.button_roles import BUTTON_ROLES
 from smashbox_viewer.button_locations import BUTTON_LOCATIONS
 from smashbox_viewer.poller import *
 import smashbox_viewer.resources.skins.default as resources
+
+
+"""
+TODO
+SKIN SELECTION 
+
+from smashbox_viewer.resources.skins import *
+
+skins_dict = {
+    "default" : resources,
+    "other" : other_package_name,
+    #...
+}
+
+get_resources(skins_dict["default"], filename)
+"""
 
 
 def get_resource(filename):
@@ -40,11 +54,15 @@ class Gui:
         self.device = device
         self.buttons = []
         self.btn_images = []
+        self.btn_map = {}
+        self.new_map = True
 
         self.mapper = Mapper()
         with open("mapped.json") as file:
             self.mapped_btns = json.load(file)
 
+        self.btnmapper = ButtonMapper()
+        self.btnmapping = [False]
         self.calibrator = Calibrator()
         self.calibrate = False
         self.cal_event = threading.Event()
@@ -53,16 +71,6 @@ class Gui:
 
         self.master.protocol("WM_DELETE_WINDOW", end)
         self.master.resizable(False, False)
-
-        """
-        self.menu_frame = tk.Frame(master=self.master)
-        self.menu_frame.pack()
-
-        self.menu = tk.StringVar(self.menu_frame)
-        self.menu.set("Select")
-        self.select = tk.OptionMenu(self.menu_frame, self.menu, "one", "two")
-        self.select.pack()
-        """
 
         self.bt_frame = tk.Frame(master=self.master)
         self.bt_frame.pack()
@@ -109,37 +117,17 @@ class Gui:
                 )
             )
 
-        """
-        # Joystick / trigger drawing for debuging
-        self.boxes = [
-            # Joystick boxes
-            self.canvas.create_rectangle(200, 300, 300, 400, outline="black"),
-            self.canvas.create_rectangle(200, 400, 300, 500, outline="black"),
-            # Trigger Single axis
-            self.canvas.create_rectangle(350, 300, 375, 400, outline="black"),
-            self.canvas.create_rectangle(350, 400, 375, 500, outline="black"),
-        ]
-        # Stick one center locations, and oval representaion
-        self.stick1 = [
-            245,
-            345,
-            self.canvas.create_oval(245, 345, 255, 355, fill="grey", outline="black"),
-        ]
-        # Stick two center locations, and oval
-        self.stick2 = [
-            245,
-            445,
-            self.canvas.create_oval(245, 445, 255, 455, fill="yellow", outline="black"),
-        ]
-
-        # Trigger center locations, and rectangle representations
-        self.triggers = [
-            350,
-            450,
-            self.canvas.create_rectangle(350, 345, 375, 355, fill="blue"),
-            self.canvas.create_rectangle(350, 445, 375, 455, fill="blue"),
-        ]
-        """
+        if self.new_map == True:
+            self.canvas.create_text(
+                (1219 / 2),
+                20,
+                fill="red",
+                font="Arial 20 bold",
+                text="No buttons bound, Press Button_Start",
+                anchor="center",
+                tag="prompt",
+            )
+            self.open_btn()
 
     def cli_map(self):
         self.mapped_btns = self.mapper.cli()
@@ -163,108 +151,82 @@ class Gui:
     def open_cal(self):
         self.calibrate = True
         self.master.unbind("<Button-3>")
-        thread = threading.Thread(
+        calthread = threading.Thread(
             target=self.calibrator.gui,
-            args=(self.canvas, self.mapped_btns, self.cal_event),
+            args=(self.master, self.canvas, self.mapped_btns, self.cal_event),
         )
-        thread.daemon = True
-        thread.start()
-        self.master.update_idletasks()
-        self.master.update()
+        calthread.daemon = True
+        calthread.start()
+
+    def open_btn(self):
+        self.new_map = False
+        self.btnmapping = [True]
+        btnthread = threading.Thread(
+            target=self.btnmapper.build_btns,
+            args=(self.mapped_btns, self.canvas, self.cal_event, self.btnmapping),
+        )
+        btnthread.daemon = True
+        btnthread.start()
 
     def processEvent(self):
         while self.queue.qsize():
             event = self.queue.get(0)
             self.update(event)
 
-    """
-    Takes tuple events from the Eventgenerator and changes images
-    for button changes, moves joystick and trigger shapes on axis
-    events.
+    def update(self, event):
 
-    TODO: once mapping is handled will need to handle buttons individually
-    to get proper images
-    """
-
-    def update(self, diff):
-
-        # Open up mapping gui
-        if "map" in diff:
-            self.open_map()
-
-        # Run calibration over gui
-        if "cal" in diff:
-            self.open_cal()
-
-        # Close calibration TODO - set by role not button number
-        if self.calibrate and ("Button9", 1) == diff:
-            self.calibrator.close_gui()
-            self.master.bind("<Button-3>", self.show_menu)
-
-        # Send frame to calibration when 'A' button is pressed
-        if self.calibrate and ("Button1", 1) == diff:
-            self.calibrator.put_frame(self.device.poll())
+        if self.btnmapping[0] and "Button" in event[0] and 1 == event[1]:
+            self.btnmapper.put_event(event)
             self.cal_event.set()
 
-        # Redo to calibration when 'B' button is pressed
-        if self.calibrate and ("Button2", 1) == diff:
-            self.calibrator.redo()
-            self.cal_event.set()
+        else:
+            # Open up mapping gui
+            if "map" in event:
+                self.open_map()
 
-        # TODO - When mapping structure is done this should change image by role
-        if "Button" in diff[0]:
-            key = diff[0].split("n")
-            num = int(key[1]) + 1
-            if diff[1] == 1:
-                self.canvas.itemconfig(self.buttons[num], image=self.btn_images[num][1])
-            else:
-                self.canvas.itemconfig(self.buttons[num], image=self.btn_images[num][0])
+            # Run calibration over gui
+            if "cal" in event:
+                self.open_cal()
 
-        """
-        # TODO - Once tranlastion is finished REMOVE all Axis monitoring
-        if "Axis0" in diff[0]:
-            loc = self.canvas.coords(self.stick1[2])
-            loc[0] = diff[1] * 50 + self.stick1[0]
-            loc[2] = loc[0] + 10
-            self.canvas.coords(self.stick1[2], loc)
-        if "Axis1" in diff[0]:
-            loc = self.canvas.coords(self.stick1[2])
-            loc[1] = diff[1] * 50 + self.stick1[1]
-            loc[3] = loc[1] + 10
-            self.canvas.coords(self.stick1[2], loc)
+            # Close calibration TODO - set by role not button number
+            if self.calibrate and ("Button_Start", 1) == event:
+                self.calibrator.close_gui()
+                self.calibrate = False
+                self.master.bind("<Button-3>", self.show_menu)
 
-        if "Axis5" in diff[0]:
-            loc = self.canvas.coords(self.stick2[2])
-            loc[0] = diff[1] * 50 + self.stick2[0]
-            loc[2] = loc[0] + 10
-            self.canvas.coords(self.stick2[2], loc)
-        if "Axis2" in diff[0]:
-            loc = self.canvas.coords(self.stick2[2])
-            loc[1] = diff[1] * 50 + self.stick2[1]
-            loc[3] = loc[1] + 10
-            self.canvas.coords(self.stick2[2], loc)
+            # Send frame to calibration when 'A' button is pressed
+            if self.calibrate and ("Button_A", 1) == event:
+                self.calibrator.put_frame(self.device.poll())
+                self.cal_event.set()
 
-        if "Axis3" in diff[0]:
-            loc = self.canvas.coords(self.triggers[2])
-            loc[1] = diff[1] * 50 + self.triggers[0]
-            loc[3] = loc[1] + 10
-            self.canvas.coords(self.triggers[2], loc)
-        if "Axis4" in diff[0]:
-            loc = self.canvas.coords(self.triggers[3])
-            loc[1] = diff[1] * 50 + self.triggers[1]
-            loc[3] = loc[1] + 10
-            self.canvas.coords(self.triggers[3], loc)
-        """
+            # Redo to calibration when 'B' button is pressed
+            if self.calibrate and ("Button_B", 1) == event:
+                self.calibrator.redo()
+                self.cal_event.set()
+
+            # TODO - When mapping structure is done this should change image by role
+            if "Button" in event[0]:
+                key = event[0].split("n")
+                num = int(key[1]) + 1
+                if event[1] == 1:
+                    self.canvas.itemconfig(
+                        self.buttons[num], image=self.btn_images[num][1]
+                    )
+                else:
+                    self.canvas.itemconfig(
+                        self.buttons[num], image=self.btn_images[num][0]
+                    )
 
         self.canvas.update_idletasks()
         self.canvas.update()
 
     # Right click context menu
     def show_menu(self, event):
-        try:
-            self.menu.post(event.x_root, event.y_root)
-        finally:
-            self.menu.grab_release()
+        if not self.btnmapping[0]:
+            try:
+                self.menu.post(event.x_root, event.y_root)
+            finally:
+                self.menu.grab_release()
 
 
 class ThreadClient:
@@ -273,6 +235,7 @@ class ThreadClient:
         self.device = device
         self.queue = queue.Queue()
         self.gui = Gui(master, self.queue, self.device, self.end)
+        self.gui.canvas.update_idletasks()
         self.gui.canvas.update()
         self.running = 1
         self.t1 = threading.Thread(target=self.runVis)
@@ -285,7 +248,8 @@ class ThreadClient:
         self.gui.processEvent()
         if not self.running:
             self.master.destroy()
-        self.master.after(0, self.eventCall)
+        else:
+            self.master.after(0, self.eventCall)
 
     def runVis(self):
         for event in EventGenerator(self.device):

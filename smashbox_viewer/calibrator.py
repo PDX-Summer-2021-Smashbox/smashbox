@@ -26,6 +26,16 @@ A "calibration dictionary" is of the following form:
 
 
 class Calibrator:
+    """
+    This class works to build a dictionary to translate axis states
+    into button roles based on the current controller mapping.
+
+    It prompts the user to press valid modifier combinations and records the
+    resulting axis outputs with the button roles.
+
+
+    """
+
     def __init__(self):
         self.calibration = {}
         self.running = False
@@ -34,7 +44,13 @@ class Calibrator:
         self.zeros = {}
         self.sticknames = ["A", "C"]
         self.sticks = {}
-        # Temp holders for modifier selection
+
+        """
+        Below is a temporary storage for the mapped modifier buttons.
+        
+        Then there are the directional dictionaries that store the 3 sets
+        of calibration direction based on which modifiers are active. 
+        """
         self.temps_mod = [[], []]
         self.all_dirs = {
             "LEFT": {"A": ["Analog_Stick_Left"], "C": ["C_Stick_Left"]},
@@ -99,7 +115,11 @@ class Calibrator:
             },
         }
 
-    def gui(self, canvas, mapping, cal_event):
+    def gui(self, master, canvas, mapping, cal_event):
+        """
+        This depends on the gui.py to run.  It takes in the active canvas
+        and prompts the user with text across the top of the canvas.
+        """
         self.running = True
         self.canvas = canvas
         self.mapping = mapping
@@ -124,6 +144,9 @@ class Calibrator:
             anchor="center",
             tag="bot_text",
         )
+
+        master.update_idletasks()
+        master.update()
 
         # Grabbing joystick zeros
         self.get_zero()
@@ -236,6 +259,9 @@ class Calibrator:
             if not self.running:
                 return
             self.zeros = self.frame.copy()
+            for btn, val in self.zeros.items():
+                if "Button" in btn and val == 1:
+                    self.add_button(btn, "Button_A")
             self.canvas.itemconfig("prompt", text="Confirm with A, retry with B")
             self.wait_frame()
         self.confirm = False
