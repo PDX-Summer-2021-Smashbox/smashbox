@@ -1,10 +1,26 @@
+
+import importlib.resources
+
+from PIL import ImageTk, Image
+import smashbox_viewer.resources.skins.default as resources
 from smashbox_viewer.button_roles import BUTTON_ROLES
 from smashbox_viewer.button_locations import BUTTON_LOCATIONS, BUTTON_NAMES
 from tkinter.constants import BOTH, CENTER, END, LEFT, RIGHT, VERTICAL
 
 import tkinter as tk
+from tkinter import filedialog as fd
+#from smashbox_viewer.gui import get_resource 
 import json
 
+
+
+
+def get_resource(filename):
+    """
+    Wrapper around importlib's resources functionality. Returns a context
+    manager that represents a filehandle.
+    """
+    return importlib.resources.path(resources, filename)
 
 class Mapper:
     """
@@ -14,16 +30,22 @@ class Mapper:
 
     The cli will return the mapped button dictionary, then export it to mapped.json
     The gui will save and export the mapped buttons
+    TODO:
+        File dialouge for saving, importing, exporting
     """
 
     def __init__(self):
         self.mapped_buttons = {}
         self.buttons = []
         self.done = False
+        self.button_imgs = {}
 
-    def gui(self, master, background, button_img):
+        # import the button skin images
+        self.import_btn_imgs()
+
+
+    def gui(self, master, background):
         self.master = master
-        self.button_img = button_img
 
         self.mp_frame = tk.Frame(master=self.master)
         self.mp_frame.pack()
@@ -31,6 +53,7 @@ class Mapper:
         self.mp_canvas.pack()
 
         self.mp_canvas.create_image(0, 0, anchor="nw", image=background)
+        self.master.resizable(False, False)
 
         # place the buttons
         self.place_btns()
@@ -76,6 +99,10 @@ class Mapper:
         self.save_exit_btn.place(x=1243, y=501)
         self.import_btn.place(x=1243, y=552)
         self.export_btn.place(x=1243, y=586)
+        
+        # import the current button mapping
+        self.import_mapped()
+
 
     # Destroy all the mapper controls
     def close_gui(self):
@@ -120,15 +147,20 @@ class Mapper:
 
     # Gets the item selected from listbox and maps to the clicked btn
     def map_btn(self, btn):
-        self.mapped_buttons[btn] = self.list_bx.get(self.list_bx.curselection())
+        selected_btn = self.list_bx.get(self.list_bx.curselection())
+        self.mapped_buttons[btn] = selected_btn
+        index = BUTTON_NAMES.index(btn)
+        self.buttons[index].configure(image=self.button_imgs[selected_btn])
         print(self.mapped_buttons)
 
+
+    # Loads A_Button as default image
     def place_btns(self):
         for indx, btn in enumerate(BUTTON_NAMES):
             self.buttons.append(
                 tk.Button(
                     master=self.master,
-                    image=self.button_img,
+                    image=self.button_imgs["Button_A"],
                     border=0,
                     highlightthickness=0,
                     bg="white",
@@ -149,7 +181,18 @@ class Mapper:
         with open("mapped.json", "r") as import_file:
             self.mapped_buttons = json.load(import_file)
 
+        # Retrieves the button index and sets button the image accordingly
+        for k, v in self.mapped_buttons.items():
+            btn_indx = self.get_btn_number(k)
+            self.buttons[btn_indx].configure(image=self.button_imgs[v])
+
         print(self.mapped_buttons)
+
+    def import_btn_imgs(self):
+        self.button_imgs = {}
+        for btn in BUTTON_ROLES:
+            with get_resource(f"{btn}.png") as img_fh:
+                self.button_imgs[btn] = ImageTk.PhotoImage(Image.open(img_fh))
 
     # Used for thread control
     def is_done(self):
@@ -157,6 +200,12 @@ class Mapper:
 
     def reset_done(self):
         self.done = False
+
+    # Returns the digit at the end of the button name.
+    # Used for retrieving the button at b# index
+    def get_btn_number(self, key):
+        text = key.split("_")
+        return int(text[1]) - 1
 
 
 # Testing
