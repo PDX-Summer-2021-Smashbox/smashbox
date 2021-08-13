@@ -1,9 +1,23 @@
+import importlib.resources
+
+from PIL import ImageTk, Image
+import smashbox_viewer.resources.skins.default as resources
 from smashbox_viewer.button_roles import BUTTON_ROLES
 from smashbox_viewer.button_locations import BUTTON_LOCATIONS, BUTTON_NAMES
 from tkinter.constants import BOTH, CENTER, END, LEFT, RIGHT, VERTICAL
 
 import tkinter as tk
+from tkinter import filedialog as fd
 import json
+import os
+
+
+def get_resource(filename):
+    """
+    Wrapper around importlib's resources functionality. Returns a context
+    manager that represents a filehandle.
+    """
+    return importlib.resources.path(resources, filename)
 
 
 class Mapper:
@@ -20,10 +34,13 @@ class Mapper:
         self.mapped_buttons = {}
         self.buttons = []
         self.done = False
+        self.button_imgs = {}
 
-    def gui(self, master, background, button_img):
+        # import the button skin images
+        self.import_btn_imgs()
+
+    def gui(self, master, background):
         self.master = master
-        self.button_img = button_img
 
         self.mp_frame = tk.Frame(master=self.master)
         self.mp_frame.pack()
@@ -31,6 +48,7 @@ class Mapper:
         self.mp_canvas.pack()
 
         self.mp_canvas.create_image(0, 0, anchor="nw", image=background)
+        self.master.resizable(False, False)
 
         # place the buttons
         self.place_btns()
@@ -77,6 +95,9 @@ class Mapper:
         self.import_btn.place(x=1243, y=552)
         self.export_btn.place(x=1243, y=586)
 
+        # import the current button mapping
+        self.load_mapping()
+
     # Destroy all the mapper controls
     def close_gui(self):
         self.map_frame.destroy()
@@ -94,7 +115,7 @@ class Mapper:
         self.buttons.clear()
 
         # export the mapped buttons and destroy the mapper
-        self.export_mapped()
+        self.save_mapped()
         self.done = True
         self.master.destroy()
 
@@ -111,6 +132,9 @@ class Mapper:
         return self.mapped_buttons
 
     def verify_input(self, button):
+        """
+        Used for verifying input from the CLI mapper
+        """
         map_index = -1
         while not int(map_index) in range(len(BUTTON_ROLES)):
             index = input(f"Set {button} to index: ")
@@ -120,15 +144,29 @@ class Mapper:
 
     # Gets the item selected from listbox and maps to the clicked btn
     def map_btn(self, btn):
-        self.mapped_buttons[btn] = self.list_bx.get(self.list_bx.curselection())
+        """
+        When a button is clicked, this function executes.
+        It sets the clicked button to the selected choice in
+        the list box.
+        """
+        selected_btn = self.list_bx.get(self.list_bx.curselection())
+        self.mapped_buttons[btn] = selected_btn
+        index = BUTTON_NAMES.index(btn)
+        self.buttons[index].configure(image=self.button_imgs[selected_btn])
         print(self.mapped_buttons)
 
+    # Loads A_Button as default image
     def place_btns(self):
+        """
+        Makes a list of buttons and places them at their
+        locations specified in BUTTON_LOCATONS.
+        Default image is Button_A
+        """
         for indx, btn in enumerate(BUTTON_NAMES):
             self.buttons.append(
                 tk.Button(
                     master=self.master,
-                    image=self.button_img,
+                    image=self.button_imgs["Button_A"],
                     border=0,
                     highlightthickness=0,
                     bg="white",
@@ -141,15 +179,65 @@ class Mapper:
                 x=BUTTON_LOCATIONS[btn][0], y=BUTTON_LOCATIONS[btn][1] - 20
             )
 
+    def save_mapped(self):
+        """
+        Saves the current button mapped to mapped.json
+        """
+        with open("mapped.json", "w") as file:
+            file.write(json.dumps(self.mapped_buttons, indent=4))
+            file.close()
+
+    def load_mapping(self):
+        """
+        Loads the current button mapping from mapped.json
+        """
+        with open("mapped.json", "r") as file:
+            self.mapped_buttons = json.load(file)
+        for k, v in self.mapped_buttons.items():
+            btn_indx = self.get_btn_number(k)
+            self.buttons[btn_indx].configure(image=self.button_imgs[v])
+
     def export_mapped(self):
-        with open("mapped.json", "w") as export_file:
-            export_file.write(json.dumps(self.mapped_buttons, indent=4))
+        """
+        Exports the current button mapping to a json file
+        where to user specifies the location and name
+        """
+        f = fd.asksaveasfile(
+            initialdir=str(os.getcwd), mode="w", defaultextension=".json"
+        )
+        if f is None:
+            return
+        f.write(json.dumps(self.mapped_buttons, indent=4))
+        f.close()
 
     def import_mapped(self):
-        with open("mapped.json", "r") as import_file:
+        """
+        Imports a button layout from a location and name
+        specified by the user
+        """
+        f = fd.askopenfilename(initialdir=os.getcwd, defaultextension=".json")
+        if f is None:
+            return
+
+        with open(f, "r") as import_file:
             self.mapped_buttons = json.load(import_file)
+            import_file.close()
+
+        # Retrieves the button index and sets button the image accordingly
+        for k, v in self.mapped_buttons.items():
+            btn_indx = self.get_btn_number(k)
+            self.buttons[btn_indx].configure(image=self.button_imgs[v])
 
         print(self.mapped_buttons)
+
+    def import_btn_imgs(self):
+        """
+        Imports all button images for the current selected skin
+        """
+        self.button_imgs = {}
+        for btn in BUTTON_ROLES:
+            with get_resource(f"{btn}.png") as img_fh:
+                self.button_imgs[btn] = ImageTk.PhotoImage(Image.open(img_fh))
 
     # Used for thread control
     def is_done(self):
@@ -157,6 +245,12 @@ class Mapper:
 
     def reset_done(self):
         self.done = False
+
+    # Returns the digit at the end of the button name.
+    # Used for retrieving the button at b# index
+    def get_btn_number(self, key):
+        text = key.split("_")
+        return int(text[1]) - 1
 
 
 # Testing
