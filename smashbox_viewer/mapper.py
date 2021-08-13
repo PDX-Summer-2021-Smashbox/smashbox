@@ -1,4 +1,3 @@
-
 import importlib.resources
 
 from PIL import ImageTk, Image
@@ -13,13 +12,13 @@ import json
 import os
 
 
-
 def get_resource(filename):
     """
     Wrapper around importlib's resources functionality. Returns a context
     manager that represents a filehandle.
     """
     return importlib.resources.path(resources, filename)
+
 
 class Mapper:
     """
@@ -39,7 +38,6 @@ class Mapper:
 
         # import the button skin images
         self.import_btn_imgs()
-
 
     def gui(self, master, background):
         self.master = master
@@ -96,10 +94,9 @@ class Mapper:
         self.save_exit_btn.place(x=1243, y=501)
         self.import_btn.place(x=1243, y=552)
         self.export_btn.place(x=1243, y=586)
-        
+
         # import the current button mapping
         self.load_mapping()
-
 
     # Destroy all the mapper controls
     def close_gui(self):
@@ -158,7 +155,6 @@ class Mapper:
         self.buttons[index].configure(image=self.button_imgs[selected_btn])
         print(self.mapped_buttons)
 
-
     # Loads A_Button as default image
     def place_btns(self):
         """
@@ -190,7 +186,7 @@ class Mapper:
         with open("mapped.json", "w") as file:
             file.write(json.dumps(self.mapped_buttons, indent=4))
             file.close()
-        
+
     def load_mapping(self):
         """
         Loads the current button mapping from mapped.json
@@ -204,9 +200,11 @@ class Mapper:
     def export_mapped(self):
         """
         Exports the current button mapping to a json file
-        where to user specifies the location and name 
+        where to user specifies the location and name
         """
-        f = fd.asksaveasfile(initialdir=str(os.getcwd), mode = "w", defaultextension=".json")
+        f = fd.asksaveasfile(
+            initialdir=str(os.getcwd), mode="w", defaultextension=".json"
+        )
         if f is None:
             return
         f.write(json.dumps(self.mapped_buttons, indent=4))
@@ -214,17 +212,17 @@ class Mapper:
 
     def import_mapped(self):
         """
-        Imports a button layout from a location and name 
+        Imports a button layout from a location and name
         specified by the user
         """
         f = fd.askopenfilename(initialdir=os.getcwd, defaultextension=".json")
         if f is None:
             return
-        
+
         with open(f, "r") as import_file:
             self.mapped_buttons = json.load(import_file)
             import_file.close()
-    
+
         # Retrieves the button index and sets button the image accordingly
         for k, v in self.mapped_buttons.items():
             btn_indx = self.get_btn_number(k)
