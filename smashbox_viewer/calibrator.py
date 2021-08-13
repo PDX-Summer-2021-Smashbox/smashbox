@@ -115,7 +115,7 @@ class Calibrator:
             },
         }
 
-    def gui(self, master, canvas, mapping, cal_event):
+    def gui(self, canvas, mapping, cal_event, refresh):
         """
         This depends on the gui.py to run.  It takes in the active canvas
         and prompts the user with text across the top of the canvas.
@@ -145,9 +145,7 @@ class Calibrator:
             tag="bot_text",
         )
 
-        master.update_idletasks()
-        master.update()
-
+        refresh()
         # Grabbing joystick zeros
         self.get_zero()
         self.btns_lshield()
@@ -259,9 +257,6 @@ class Calibrator:
             if not self.running:
                 return
             self.zeros = self.frame.copy()
-            for btn, val in self.zeros.items():
-                if "Button" in btn and val == 1:
-                    self.add_button(btn, "Button_A")
             self.canvas.itemconfig("prompt", text="Confirm with A, retry with B")
             self.wait_frame()
         self.confirm = False
@@ -488,6 +483,12 @@ class Calibrator:
         self.calibration.update(dic)
 
         self.confirm = False
+
+    def get_calibration(self):
+        return self.calibration
+
+    def get_sticks(self):
+        return self.sticks
 
     def wait_frame(self):
         while not self.cal_event.isSet():

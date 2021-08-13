@@ -1,9 +1,12 @@
 import importlib.resources
+from smashbox_viewer.button_roles import BUTTON_ROLES
+from smashbox_viewer.translator import QuasiTranslator, RawTranslator
 import tkinter as tk
 
 from PIL import ImageTk, Image
 import threading, queue, pygame, json
 
+from ast import literal_eval
 from smashbox_viewer.mapper import Mapper
 from smashbox_viewer.calibrator import Calibrator
 from smashbox_viewer.button_map import ButtonMapper
@@ -20,9 +23,9 @@ SKIN SELECTION
 from smashbox_viewer.resources.skins import *
 
 skins_dict = {
-    "default" : resources,
-    "other" : other_package_name,
-    #...
+    "default": resources,
+    "black": other_package_name,
+    "transparent":
 }
 
 get_resources(skins_dict["default"], filename)
@@ -37,6 +40,16 @@ def get_resource(filename):
     return importlib.resources.path(resources, filename)
 
 
+def parse_calibration_dict(file):
+    raw_dict = json.load(file)
+    return {
+        outer_k: {
+            literal_eval(inner_k): inner_v for inner_k, inner_v in outer_v.items()
+        }
+        for outer_k, outer_v in raw_dict.items()
+    }
+
+
 class Gui:
     """
     Class to display controller output based from EventGenerator.
@@ -48,30 +61,47 @@ class Gui:
     need a data structure to track location, button image, pressed image.
     """
 
-    def __init__(self, master, queue, device, end):
+    def __init__(self, master, device):
         self.master = master
-        self.queue = queue
         self.device = device
-        self.buttons = []
-        self.btn_images = []
-        self.btn_map = {}
+
         self.new_map = True
-
-        self.mapper = Mapper()
-        with open("mapped.json") as file:
-            self.mapped_btns = json.load(file)
-
-        self.btnmapper = ButtonMapper()
-        self.btnmapping = [False]
-        self.calibrator = Calibrator()
+        self.translate = True
+        self.btnmapping = False
         self.calibrate = False
+
+        self.buttons = {}
+        self.btn_images = {}
+        self.layout = {}
+        self.profile = {}
+        self.sticks = {}
+        self.running = 1
+
+        self.queue = queue.Queue()
+        self.mapper = Mapper()
+        self.btnmapper = ButtonMapper()
+        self.calibrator = Calibrator()
         self.cal_event = threading.Event()
 
+        try:
+            with open("mapped.json") as file:
+                self.layout = json.load(file)
+        except:
+            # LOAD DEFAULT if no custom
+            pass
+
+        try:
+            with open("profile.json") as file:
+                self.profile = parse_calibration_dict(file)
+                self.new_map = False
+
+        except:
+            self.translate = False
+            pass
+
         master.title("Smashbox Viewer")
-
-        self.master.protocol("WM_DELETE_WINDOW", end)
+        self.master.protocol("WM_DELETE_WINDOW", self.end_gui)
         self.master.resizable(False, False)
-
         self.bt_frame = tk.Frame(master=self.master)
         self.bt_frame.pack()
         self.canvas = tk.Canvas(self.bt_frame, width=1219, height=624)
@@ -90,9 +120,9 @@ class Gui:
         with get_resource("base.png") as img_fh:
             self.base = ImageTk.PhotoImage(Image.open(img_fh))
 
-        for btn in self.mapped_btns.values():
+        for role in self.layout.values():
             imgs = []
-            if btn == "Button_Disabled":
+            if role == "Button_Disabled":
                 with get_resource(f"Transparent.png") as img_fh:
                     imgs.append(ImageTk.PhotoImage(Image.open(img_fh)))
 
@@ -100,21 +130,26 @@ class Gui:
                     imgs.append(ImageTk.PhotoImage(Image.open(img_fh)))
 
             else:
-                with get_resource(f"{btn}.png") as img_fh:
+                with get_resource(f"{role}.png") as img_fh:
                     imgs.append(ImageTk.PhotoImage(Image.open(img_fh)))
 
-                with get_resource(f"{btn}_Pressed.png") as img_fh:
+                with get_resource(f"{role}_Pressed.png") as img_fh:
                     imgs.append(ImageTk.PhotoImage(Image.open(img_fh)))
 
-            self.btn_images.append(imgs)
+            self.btn_images.update({role: imgs})
 
         self.canvas.create_image(0, 0, anchor="nw", image=self.background)
 
-        for btn, img in zip(BUTTON_LOCATIONS, self.btn_images):
-            self.buttons.append(
-                self.canvas.create_image(
-                    BUTTON_LOCATIONS[btn][0], BUTTON_LOCATIONS[btn][1], image=img[0]
-                )
+        for btn, role, img in zip(
+            BUTTON_LOCATIONS, self.btn_images.keys(), self.btn_images.values()
+        ):
+            # print(btn + " " + role + " " + img)
+            self.buttons.update(
+                {
+                    role: self.canvas.create_image(
+                        BUTTON_LOCATIONS[btn][0], BUTTON_LOCATIONS[btn][1], image=img[0]
+                    )
+                }
             )
 
         if self.new_map == True:
@@ -129,8 +164,12 @@ class Gui:
             )
             self.open_btn()
 
+        self.master.update_idletasks()
+        self.master.update()
+        self.run_gui()
+
     def cli_map(self):
-        self.mapped_btns = self.mapper.cli()
+        self.layout = self.mapper.cli()
 
     def open_map(self):
         # Hide visualizer
@@ -153,17 +192,24 @@ class Gui:
         self.master.unbind("<Button-3>")
         calthread = threading.Thread(
             target=self.calibrator.gui,
-            args=(self.master, self.canvas, self.mapped_btns, self.cal_event),
+            args=(self.canvas, self.layout, self.cal_event, self.refresh),
         )
         calthread.daemon = True
         calthread.start()
 
     def open_btn(self):
         self.new_map = False
-        self.btnmapping = [True]
+        self.btnmapping = True
         btnthread = threading.Thread(
             target=self.btnmapper.build_btns,
-            args=(self.mapped_btns, self.canvas, self.cal_event, self.btnmapping),
+            args=(
+                self.profile,
+                self.layout,
+                self.canvas,
+                self.cal_event,
+                self.end_btnmap,
+                self.refresh
+            ),
         )
         btnthread.daemon = True
         btnthread.start()
@@ -173,29 +219,40 @@ class Gui:
             event = self.queue.get(0)
             self.update(event)
 
-    def update(self, event):
+    def refresh(self):
+        self.master.update_idletasks()
+        self.master.update()
 
-        if self.btnmapping[0] and "Button" in event[0] and 1 == event[1]:
+    def update(self, event):
+        # Open up mapping gui
+        if "map" in event:
+            self.open_map()
+
+        # Run calibration over gui
+        elif "cal" in event:
+            self.open_cal()
+
+        elif self.btnmapping and "Button" in event[0] and 1 == event[1]:
             self.btnmapper.put_event(event)
             self.cal_event.set()
 
-        else:
-            # Open up mapping gui
-            if "map" in event:
-                self.open_map()
+        elif not self.btnmapping:
 
-            # Run calibration over gui
-            if "cal" in event:
-                self.open_cal()
-
-            # Close calibration TODO - set by role not button number
+            # Close calibration
             if self.calibrate and ("Button_Start", 1) == event:
                 self.calibrator.close_gui()
                 self.calibrate = False
                 self.master.bind("<Button-3>", self.show_menu)
+                self.profile.update(self.calibrator.get_calibration())
+                self.sticks = self.calibrator.get_sticks()
+                self.switch()
+                print(self.sticks)
+                print(self.profile)
+                # self.save_profile()
 
             # Send frame to calibration when 'A' button is pressed
             if self.calibrate and ("Button_A", 1) == event:
+                print("SEND FRAME")
                 self.calibrator.put_frame(self.device.poll())
                 self.cal_event.set()
 
@@ -205,59 +262,76 @@ class Gui:
                 self.cal_event.set()
 
             # TODO - When mapping structure is done this should change image by role
-            if "Button" in event[0]:
-                key = event[0].split("n")
-                num = int(key[1]) + 1
-                if event[1] == 1:
-                    self.canvas.itemconfig(
-                        self.buttons[num], image=self.btn_images[num][1]
-                    )
-                else:
-                    self.canvas.itemconfig(
-                        self.buttons[num], image=self.btn_images[num][0]
-                    )
+
+            if event[1] == 1:
+                self.canvas.itemconfig(
+                    self.buttons[event[0]], image=self.btn_images[event[0]][1]
+                )
+            else:
+                self.canvas.itemconfig(
+                    self.buttons[event[0]], image=self.btn_images[event[0]][0]
+                )
 
         self.canvas.update_idletasks()
         self.canvas.update()
 
     # Right click context menu
     def show_menu(self, event):
-        if not self.btnmapping[0]:
+        if not self.btnmapping:
             try:
                 self.menu.post(event.x_root, event.y_root)
             finally:
                 self.menu.grab_release()
 
+    def save_profile(self):
+        with open("profile.json", "w") as export_file:
+            export_file.write(json.dumps(self.profile, indent=4))
 
-class ThreadClient:
-    def __init__(self, master, device):
-        self.master = master
-        self.device = device
-        self.queue = queue.Queue()
-        self.gui = Gui(master, self.queue, self.device, self.end)
-        self.gui.canvas.update_idletasks()
-        self.gui.canvas.update()
-        self.running = 1
+    def end_btnmap(self):
+        self.btnmapping = False
+        self.switch()
+
+    def end_gui(self):
+        self.running = 0
+
+    def run_gui(self):
+        self.event_gen = EventGenerator(self.device)
         self.t1 = threading.Thread(target=self.runVis)
         self.t1.daemon = True
         self.t1.start()
-
         self.eventCall()
 
     def eventCall(self):
-        self.gui.processEvent()
+        self.processEvent()
         if not self.running:
+            self.save_profile()
             self.master.destroy()
         else:
             self.master.after(0, self.eventCall)
 
     def runVis(self):
-        for event in EventGenerator(self.device):
-            self.queue.put(event)
-            print(event)
+        if self.translate:
+            self.t_device = RawTranslator(
+                FrameParser(self.device, self.sticks.copy()),
+                self.layout.values(),
+                self.profile.copy(),
+            )
+            for event in EventGenerator(self.t_device):
+                self.queue.put(event)
+                print(event)
+        else:
+            for event in EventGenerator(self.device):
+                if self.translate:
+                    break
+                self.queue.put(event)
+                print(event)
 
-    def end(self):
-        self.running = 0
+    def switch(self):
+        self.translate = True
+        self.t1 = threading.Thread(target=self.runVis)
+        self.t1.daemon = True
+        self.t1.start()
+        self.eventCall()
 
 
 # Testing program
@@ -270,7 +344,7 @@ def main():
     device.joystick.init()
 
     root = tk.Tk()
-    gui = ThreadClient(root, device)
+    gui = Gui(root, device)
     root.mainloop()
 
 

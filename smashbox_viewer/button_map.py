@@ -16,16 +16,16 @@ class ButtonMapper:
         self.roles = []
         self.correct = False
         self.event = None
-        self.btn_map = {}
 
     def wait_event(self):
         while not self.cal_event.isSet():
             self.cal_event.wait()
         self.cal_event.clear()
 
-    def build_btns(self, mapping, canvas, cal_event, running):
+    def build_btns(self, profile, mapping, canvas, cal_event, end_btnmap, refresh):
         self.cal_event = cal_event
         self.canvas = canvas
+        self.refresh = refresh
 
         for role in self.pos_roles:
             if role in mapping.values():
@@ -43,19 +43,19 @@ class ButtonMapper:
                 self.canvas.itemconfig("prompt", text=f"Press {role}")
                 self.wait_event()
                 self.add_button(self.event[0], role, tmp_map)
-                self.canvas.itemconfig("prompt", text="Confirm with A, retry with B")
+            self.canvas.itemconfig("prompt", text="Confirm with A, retry with B")
             while True:
                 self.wait_event()
                 if self.event[0] not in tmp_map:
                     break
                 if "Button_A" in tmp_map[self.event[0]][1][0][0]:
                     self.correct = True
-                    self.btn_map.update(tmp_map)
+                    profile.update(tmp_map)
                     break
                 if "Button_B" in tmp_map[self.event[0]][1][0][0]:
                     break
-        print(self.btn_map)
-        running[0] = False
+        print(profile)
+        end_btnmap()
         self.close()
 
     def add_button(self, btn, role, map):
@@ -76,5 +76,6 @@ class ButtonMapper:
         self.roles.clear()
         self.event = None
         self.confirm = False
-        self.btn_map.clear()
         self.canvas.delete("prompt")
+        self.refresh
+        
