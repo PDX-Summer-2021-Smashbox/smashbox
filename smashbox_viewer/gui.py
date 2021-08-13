@@ -49,6 +49,13 @@ def parse_calibration_dict(file):
         for outer_k, outer_v in raw_dict.items()
     }
 
+def parse_dict_json(dict):
+    return {
+        outer_k: {
+            str(inner_k): inner_v for inner_k, inner_v in outer_v.items()
+        }
+        for outer_k, outer_v in dict.items()
+    }
 
 class Gui:
     """
@@ -74,7 +81,7 @@ class Gui:
         self.btn_images = {}
         self.layout = {}
         self.profile = {}
-        self.sticks = {}
+        self.sticks = {} #{'Astick': ('Axis0', 'Axis1'), 'Cstick': ('Axis3', 'Axis4')} # TODO: CHANGE THIS BACK {}
         self.running = 1
 
         self.queue = queue.Queue()
@@ -299,7 +306,7 @@ class Gui:
 
     def save_profile(self):
         with open("profile.json", "w") as export_file:
-            export_file.write(json.dumps(self.profile, indent=4))
+            export_file.write(json.dumps(parse_dict_json(self.profile), indent=4))
 
     def end_btnmap(self):
         self.btnmapping = False

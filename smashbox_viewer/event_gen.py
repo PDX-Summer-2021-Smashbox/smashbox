@@ -8,7 +8,7 @@ Events are tuples that associate a button, axis, or hat with a new state.
 
 import itertools
 
-DEFAULT_AXIS_TOLERANCE = 0.01
+DEFAULT_AXIS_TOLERANCE = 1.0/256.0
 
 
 class EventGenerator:

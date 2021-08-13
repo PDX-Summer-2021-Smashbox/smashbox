@@ -3,6 +3,7 @@ import itertools, json
 from smashbox_viewer.button_roles import BUTTON_ROLES
 from smashbox_viewer.event_gen import diff_frames
 
+
 """
 A "calibration dictionary" is of the following form:
     {
@@ -115,6 +116,15 @@ class Calibrator:
             },
         }
 
+    def all_dirs_f(self):
+        return self.all_dirs.copy()
+
+    def x_dirs_f(self):
+        return self.x_dirs.copy()
+
+    def y_dirs_f(self):
+        return self.y_dirs.copy()
+
     def gui(self, canvas, mapping, cal_event):
         """
         This depends on the gui.py to run.  It takes in the active canvas
@@ -161,7 +171,8 @@ class Calibrator:
             self.build_states(self.sticknames[1], frames, self.all_dirs, [mode])
 
         for mod in self.temps_mod[0]:
-            dirs = []
+            dirs = {}
+            dirs.clear()
             x_y_t = {"X": False, "Y": False, "Tilt": False}
             for btn in mod:
                 if "Tilt" in btn.split("_"):
@@ -177,6 +188,8 @@ class Calibrator:
             else:
                 dirs = self.y_dirs
 
+            if mode:
+                mod.append(mode)
             frames = self.build_frames(list(dirs.keys()), name, mod)
             self.build_states(name, frames, dirs, mod)
 
@@ -185,7 +198,7 @@ class Calibrator:
         x_axis, y_axis = self.sticks[f"{name}stick"]
         for frame, dir in zip(frames, directions.values()):
             state = (frame[x_axis], frame[y_axis])
-            buttons = dir[name]
+            buttons = dir[name].copy()
             if modifiers:
                 buttons += modifiers
             if key not in self.calibration:
@@ -193,21 +206,12 @@ class Calibrator:
             elif state not in self.calibration[key]:
                 self.calibration[key][state] = [buttons]
             else:
-                self.calibration[key][state].append(buttons)
+                self.calibration[key][state] += [buttons]
 
     def build_stick(self, stick, frames):
-        diffs = dict(diff_frames(frames[0], frames[1]))
-        max = 0.0
-        x_axis, y_axis = "", ""
-        for key, value in diffs.items():
-            if "Axis" in key:
-                if abs(value) > abs(max):
-                    max = value
-                    x_axis = y_axis
-                    y_axis = key
-                else:
-                    x_axis = key
-        self.sticks[f"{stick}stick"] = (x_axis, y_axis)
+        diff_x = dict(diff_frames(self.zeros, frames[0]))
+        diff_y = dict(diff_frames(frames[0], frames[1]))
+        self.sticks[f"{stick}stick"] = (list(diff_x)[0], list(diff_y)[0])
 
     def build_frames(self, dirs, stick, modifiers=None):
         frames = []
