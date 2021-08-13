@@ -9,9 +9,8 @@ from tkinter.constants import BOTH, CENTER, END, LEFT, RIGHT, VERTICAL
 
 import tkinter as tk
 from tkinter import filedialog as fd
-#from smashbox_viewer.gui import get_resource 
 import json
-
+import os
 
 
 
@@ -30,8 +29,6 @@ class Mapper:
 
     The cli will return the mapped button dictionary, then export it to mapped.json
     The gui will save and export the mapped buttons
-    TODO:
-        File dialouge for saving, importing, exporting
     """
 
     def __init__(self):
@@ -101,7 +98,7 @@ class Mapper:
         self.export_btn.place(x=1243, y=586)
         
         # import the current button mapping
-        self.import_mapped()
+        self.load_mapping()
 
 
     # Destroy all the mapper controls
@@ -121,7 +118,7 @@ class Mapper:
         self.buttons.clear()
 
         # export the mapped buttons and destroy the mapper
-        self.export_mapped()
+        self.save_mapped()
         self.done = True
         self.master.destroy()
 
@@ -138,6 +135,9 @@ class Mapper:
         return self.mapped_buttons
 
     def verify_input(self, button):
+        """
+        Used for verifying input from the CLI mapper
+        """
         map_index = -1
         while not int(map_index) in range(len(BUTTON_ROLES)):
             index = input(f"Set {button} to index: ")
@@ -147,6 +147,11 @@ class Mapper:
 
     # Gets the item selected from listbox and maps to the clicked btn
     def map_btn(self, btn):
+        """
+        When a button is clicked, this function executes.
+        It sets the clicked button to the selected choice in
+        the list box.
+        """
         selected_btn = self.list_bx.get(self.list_bx.curselection())
         self.mapped_buttons[btn] = selected_btn
         index = BUTTON_NAMES.index(btn)
@@ -156,6 +161,11 @@ class Mapper:
 
     # Loads A_Button as default image
     def place_btns(self):
+        """
+        Makes a list of buttons and places them at their
+        locations specified in BUTTON_LOCATONS.
+        Default image is Button_A
+        """
         for indx, btn in enumerate(BUTTON_NAMES):
             self.buttons.append(
                 tk.Button(
@@ -173,14 +183,48 @@ class Mapper:
                 x=BUTTON_LOCATIONS[btn][0], y=BUTTON_LOCATIONS[btn][1] - 20
             )
 
+    def save_mapped(self):
+        """
+        Saves the current button mapped to mapped.json
+        """
+        with open("mapped.json", "w") as file:
+            file.write(json.dumps(self.mapped_buttons, indent=4))
+            file.close()
+        
+    def load_mapping(self):
+        """
+        Loads the current button mapping from mapped.json
+        """
+        with open("mapped.json", "r") as file:
+            self.mapped_buttons = json.load(file)
+        for k, v in self.mapped_buttons.items():
+            btn_indx = self.get_btn_number(k)
+            self.buttons[btn_indx].configure(image=self.button_imgs[v])
+
     def export_mapped(self):
-        with open("mapped.json", "w") as export_file:
-            export_file.write(json.dumps(self.mapped_buttons, indent=4))
+        """
+        Exports the current button mapping to a json file
+        where to user specifies the location and name 
+        """
+        f = fd.asksaveasfile(initialdir=str(os.getcwd), mode = "w", defaultextension=".json")
+        if f is None:
+            return
+        f.write(json.dumps(self.mapped_buttons, indent=4))
+        f.close()
 
     def import_mapped(self):
-        with open("mapped.json", "r") as import_file:
+        """
+        Imports a button layout from a location and name 
+        specified by the user
+        """
+        f = fd.askopenfilename(initialdir=os.getcwd, defaultextension=".json")
+        if f is None:
+            return
+        
+        with open(f, "r") as import_file:
             self.mapped_buttons = json.load(import_file)
-
+            import_file.close()
+    
         # Retrieves the button index and sets button the image accordingly
         for k, v in self.mapped_buttons.items():
             btn_indx = self.get_btn_number(k)
@@ -189,6 +233,9 @@ class Mapper:
         print(self.mapped_buttons)
 
     def import_btn_imgs(self):
+        """
+        Imports all button images for the current selected skin
+        """
         self.button_imgs = {}
         for btn in BUTTON_ROLES:
             with get_resource(f"{btn}.png") as img_fh:
