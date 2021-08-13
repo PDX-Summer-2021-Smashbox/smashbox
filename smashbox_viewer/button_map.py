@@ -22,10 +22,9 @@ class ButtonMapper:
             self.cal_event.wait()
         self.cal_event.clear()
 
-    def build_btns(self, profile, mapping, canvas, cal_event, end_btnmap, refresh):
+    def build_btns(self, profile, mapping, canvas, cal_event, end_btnmap):
         self.cal_event = cal_event
         self.canvas = canvas
-        self.refresh = refresh
 
         for role in self.pos_roles:
             if role in mapping.values():
@@ -77,5 +76,4 @@ class ButtonMapper:
         self.event = None
         self.confirm = False
         self.canvas.delete("prompt")
-        self.refresh
         

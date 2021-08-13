@@ -115,7 +115,7 @@ class Calibrator:
             },
         }
 
-    def gui(self, canvas, mapping, cal_event, refresh):
+    def gui(self, canvas, mapping, cal_event):
         """
         This depends on the gui.py to run.  It takes in the active canvas
         and prompts the user with text across the top of the canvas.
@@ -125,27 +125,6 @@ class Calibrator:
         self.mapping = mapping
         self.cal_event = cal_event
 
-        self.canvas.create_text(
-            (self.canvas.winfo_width() / 2),
-            20,
-            fill="red",
-            font="Arial 20 bold",
-            text="Getting baseline only press A",
-            anchor="center",
-            tag="prompt",
-        )
-
-        self.canvas.create_text(
-            (self.canvas.winfo_width() / 2),
-            600,
-            fill="red",
-            font="Arial 20 bold",
-            text="Calibrating - Press Start to exit.",
-            anchor="center",
-            tag="bot_text",
-        )
-
-        refresh()
         # Grabbing joystick zeros
         self.get_zero()
         self.btns_lshield()

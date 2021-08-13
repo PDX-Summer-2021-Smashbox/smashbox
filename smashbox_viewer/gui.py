@@ -190,9 +190,30 @@ class Gui:
     def open_cal(self):
         self.calibrate = True
         self.master.unbind("<Button-3>")
+        self.canvas.create_text(
+            (self.canvas.winfo_width() / 2),
+            20,
+            fill="red",
+            font="Arial 20 bold",
+            text="Getting baseline only press A",
+            anchor="center",
+            tag="prompt",
+        )
+
+        self.canvas.create_text(
+            (self.canvas.winfo_width() / 2),
+            600,
+            fill="red",
+            font="Arial 20 bold",
+            text="Calibrating - Press Start to exit.",
+            anchor="center",
+            tag="bot_text",
+        )
+        self.master.update_idletasks()
+        self.master.update()
         calthread = threading.Thread(
             target=self.calibrator.gui,
-            args=(self.canvas, self.layout, self.cal_event, self.refresh),
+            args=(self.canvas, self.layout, self.cal_event),
         )
         calthread.daemon = True
         calthread.start()
@@ -208,7 +229,6 @@ class Gui:
                 self.canvas,
                 self.cal_event,
                 self.end_btnmap,
-                self.refresh
             ),
         )
         btnthread.daemon = True
@@ -218,10 +238,6 @@ class Gui:
         while self.queue.qsize():
             event = self.queue.get(0)
             self.update(event)
-
-    def refresh(self):
-        self.master.update_idletasks()
-        self.master.update()
 
     def update(self, event):
         # Open up mapping gui
@@ -246,9 +262,7 @@ class Gui:
                 self.profile.update(self.calibrator.get_calibration())
                 self.sticks = self.calibrator.get_sticks()
                 self.switch()
-                print(self.sticks)
-                print(self.profile)
-                # self.save_profile()
+                self.save_profile()
 
             # Send frame to calibration when 'A' button is pressed
             if self.calibrate and ("Button_A", 1) == event:
