@@ -140,7 +140,7 @@ Checklist
 | Build Instructions | ✔️️ |
 | Install Instructions | ✔️️ |
 | Unit Test Instructions | ✔️️ | 
-| Run Instructions | ❌ ️|
+| Run Instructions | ✔️️ |
 | Demo run | ❌ |
 | Acknowledgements | ✔️️ |
 | License | ✔️️ |
