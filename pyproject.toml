@@ -19,7 +19,7 @@ black = "^21.6b0"
 
 [tool.poetry.scripts]
 recorder = "smashbox_viewer.recorder:main"
-gui_thread = "smashbox_viewer.gui_thread:main"
+gui = "smashbox_viewer.gui:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

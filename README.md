@@ -94,7 +94,7 @@ Running
 Assuming that you've installed the `.whl` into your Python environment, run
 
 ``` {.bash}
-python -m smashbox_viewer.gui_thread
+python -m smashbox_viewer.gui
 ```
 
 Video
@@ -136,17 +136,17 @@ directory of image assets for a specific controller and referring to it as a
 Checklist
 =========
 
-| Thing | Done? |
-|----------|-----------|
-| Content is original | ✔️ |
-| Full names | ✔️ |
-| Project name | ✔️ |
-| Description | ✔️ |
-| Build Instructions | ✔️️ |
-| Install Instructions | ✔️️ |
-| Unit Test Instructions | ✔️️ | 
-| Run Instructions | ✔️️ |
-| Demo run | ✔️️ |
-| Acknowledgements | ✔️️ |
-| License | ✔️️ |
-| License Pointer | ✔️️ |
+| Thing                  | Done? |
+| ---------------------- | ----- |
+| Content is original    | ✔️     |
+| Full names             | ✔️     |
+| Project name           | ✔️     |
+| Description            | ✔️     |
+| Build Instructions     | ✔️️     |
+| Install Instructions   | ✔️️     |
+| Unit Test Instructions | ✔️️     |
+| Run Instructions       | ✔️️     |
+| Demo run               | ✔️️     |
+| Acknowledgements       | ✔️️     |
+| License                | ✔️️     |
+| License Pointer        | ✔️️     |
