@@ -53,17 +53,17 @@ def parse_calibration_dict(file):
         for outer_k, outer_v in raw_dict.items()
     }
 
+
 def parse_dict_json(dict):
     """
     Helper function that convers Python dictionary keys/values into strings
     to be dumped into a JSON file.
     """
     return {
-        outer_k: {
-            str(inner_k): inner_v for inner_k, inner_v in outer_v.items()
-        }
+        outer_k: {str(inner_k): inner_v for inner_k, inner_v in outer_v.items()}
         for outer_k, outer_v in dict.items()
     }
+
 
 class Gui:
     """
@@ -75,7 +75,7 @@ class Gui:
 
     TODO - Fix the thread handling
 
-    Current issue: The event handing is run in a background thread to allow normal 
+    Current issue: The event handing is run in a background thread to allow normal
     Tkinter keyboard/mouse handling.  This needs to be restarted based on changes in calibration
     between the raw events from the controller and the translated events when the calibration
     dictionary is loaded.
@@ -90,7 +90,7 @@ class Gui:
 
         Builds the intial window passed of the mapping and profile files if present.
 
-        Using the profile provided builds the screen with the approriate buttons, 
+        Using the profile provided builds the screen with the approriate buttons,
         loading them into memory in a dictionary. The order of the profile is the same
         as the button locations so the loop can place them in the correct spots on screen.
 
@@ -108,7 +108,9 @@ class Gui:
         self.btn_images = {}
         self.layout = {}
         self.profile = {}
-        self.sticks = {} #{'Astick': ('Axis0', 'Axis1'), 'Cstick': ('Axis3', 'Axis4')} # TODO: CHANGE THIS BACK {}
+        self.sticks = (
+            {}
+        )  # {'Astick': ('Axis0', 'Axis1'), 'Cstick': ('Axis3', 'Axis4')} # TODO: CHANGE THIS BACK {}
         self.running = 1
 
         self.queue = queue.Queue()
@@ -212,7 +214,7 @@ class Gui:
         """
         Hides the visualizer window and opens the mapper in
         a new tk window, when that window signals an exit,
-        shows the visualizer again.        
+        shows the visualizer again.
         """
         self.master.withdraw()
 
@@ -418,7 +420,7 @@ class Gui:
                     break
                 self.queue.put(event)
                 print(event)
-    
+
     def processEvent(self):
         """
         Checks the queue for events and sends them to the update
