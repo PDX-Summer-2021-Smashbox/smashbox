@@ -41,6 +41,10 @@ def get_resource(filename):
 
 
 def parse_calibration_dict(file):
+    """
+    Helper function to convert JSON loaded dictionary keys/values from strings
+    back into ints, floats, and tuples.
+    """
     raw_dict = json.load(file)
     return {
         outer_k: {
@@ -50,6 +54,10 @@ def parse_calibration_dict(file):
     }
 
 def parse_dict_json(dict):
+    """
+    Helper function that convers Python dictionary keys/values into strings
+    to be dumped into a JSON file.
+    """
     return {
         outer_k: {
             str(inner_k): inner_v for inner_k, inner_v in outer_v.items()
@@ -63,12 +71,31 @@ class Gui:
     Takes a tkinter window on initialization and puts a frame/canvas with
     all the buttons and axis visualization.
 
-    TODO - Once mapping is done button images need to be properly
-    choosen and assigned with button locations. Buttons will probably
-    need a data structure to track location, button image, pressed image.
+    Handles the swapping between the button vizualizer, the mapper, and the calibrator.
+
+    TODO - Fix the thread handling
+
+    Current issue: The event handing is run in a background thread to allow normal 
+    Tkinter keyboard/mouse handling.  This needs to be restarted based on changes in calibration
+    between the raw events from the controller and the translated events when the calibration
+    dictionary is loaded.
+
+    Currently the calibration thread is not closing properly on exit. So everytime the calibration quit
+    signal is sent the thread contiues to run until the program is closed.
     """
 
     def __init__(self, master, device):
+        """
+        Initializes all defaults for flags and storage for mapping and calibration
+
+        Builds the intial window passed of the mapping and profile files if present.
+
+        Using the profile provided builds the screen with the approriate buttons, 
+        loading them into memory in a dictionary. The order of the profile is the same
+        as the button locations so the loop can place them in the correct spots on screen.
+
+        If there is no profile forces the user to build the profile for buttons only.
+        """
         self.master = master
         self.device = device
 
@@ -176,10 +203,17 @@ class Gui:
         self.run_gui()
 
     def cli_map(self):
+        """
+        Opens the command line mapping interface
+        """
         self.layout = self.mapper.cli()
 
     def open_map(self):
-        # Hide visualizer
+        """
+        Hides the visualizer window and opens the mapper in
+        a new tk window, when that window signals an exit,
+        shows the visualizer again.        
+        """
         self.master.withdraw()
 
         root = tk.Toplevel()
@@ -195,6 +229,12 @@ class Gui:
         self.master.deiconify()
 
     def open_cal(self):
+        """
+        Opens the calibration gui in a seperate thread.  Still uses the same
+        window as the visualizer.
+
+        Adds the starting prompt text to get around tkinter update issues.
+        """
         self.calibrate = True
         self.master.unbind("<Button-3>")
         self.canvas.create_text(
@@ -226,6 +266,11 @@ class Gui:
         calthread.start()
 
     def open_btn(self):
+        """
+        Used to map buttons to calibration dictionary.
+        Assigns flags for the update function to work properly
+        and opens the button mapper in a new thread.
+        """
         self.new_map = False
         self.btnmapping = True
         btnthread = threading.Thread(
@@ -241,12 +286,15 @@ class Gui:
         btnthread.daemon = True
         btnthread.start()
 
-    def processEvent(self):
-        while self.queue.qsize():
-            event = self.queue.get(0)
-            self.update(event)
-
     def update(self, event):
+        """
+        Handles the control of the changes in the gui.
+        Events come from the queue and based on the event and the
+        current settings of flags runs other functions or updates
+        the images on the canvas for button presses
+
+
+        """
         # Open up mapping gui
         if "map" in event:
             self.open_map()
@@ -255,13 +303,15 @@ class Gui:
         elif "cal" in event:
             self.open_cal()
 
+        # If the button mapper is active, sends the raw gamepad events to the mapper
         elif self.btnmapping and "Button" in event[0] and 1 == event[1]:
             self.btnmapper.put_event(event)
             self.cal_event.set()
 
         elif not self.btnmapping:
 
-            # Close calibration
+            # Close calibration, rest flag, rebind menu button, update calibration and sticks
+            # Restart the event generator to use translated events
             if self.calibrate and ("Button_Start", 1) == event:
                 self.calibrator.close_gui()
                 self.calibrate = False
@@ -271,19 +321,19 @@ class Gui:
                 self.switch()
                 self.save_profile()
 
-            # Send frame to calibration when 'A' button is pressed
+            # Send frame to calibrator when 'A' button is pressed
             if self.calibrate and ("Button_A", 1) == event:
                 print("SEND FRAME")
                 self.calibrator.put_frame(self.device.poll())
                 self.cal_event.set()
 
-            # Redo to calibration when 'B' button is pressed
+            # Send Redo to calibration when 'B' button is pressed
             if self.calibrate and ("Button_B", 1) == event:
                 self.calibrator.redo()
                 self.cal_event.set()
 
-            # TODO - When mapping structure is done this should change image by role
-
+            # Swaps the image for the approriate role, which is event[0], based on
+            # the state from the event[1]. 1 is pressed, 0 is released
             if event[1] == 1:
                 self.canvas.itemconfig(
                     self.buttons[event[0]], image=self.btn_images[event[0]][1]
@@ -293,11 +343,15 @@ class Gui:
                     self.buttons[event[0]], image=self.btn_images[event[0]][0]
                 )
 
+        # Update the canvas at the end of every cycle
         self.canvas.update_idletasks()
         self.canvas.update()
 
     # Right click context menu
     def show_menu(self, event):
+        """
+        Show the context menu where the user right clicks on the window
+        """
         if not self.btnmapping:
             try:
                 self.menu.post(event.x_root, event.y_root)
@@ -305,32 +359,50 @@ class Gui:
                 self.menu.grab_release()
 
     def save_profile(self):
+        """
+        Dumps the calibration dictionary to the profile as a JSON
+        """
         with open("profile.json", "w") as export_file:
             export_file.write(json.dumps(parse_dict_json(self.profile), indent=4))
 
     def end_btnmap(self):
+        """
+        Helper function to allow the button mapper to quit
+        resets the flag and switchs the event generator to
+        translation
+        """
         self.btnmapping = False
         self.switch()
 
     def end_gui(self):
+        """
+        Flag to signal the user has closed the main window
+        """
         self.running = 0
 
     def run_gui(self):
+        """
+        Used to start the initial visualizer run. Opens the visualizer
+        in a new thread and starts event generation in the main thread
+        with the eventCall()
+        """
         self.event_gen = EventGenerator(self.device)
         self.t1 = threading.Thread(target=self.runVis)
         self.t1.daemon = True
         self.t1.start()
         self.eventCall()
 
-    def eventCall(self):
-        self.processEvent()
-        if not self.running:
-            self.save_profile()
-            self.master.destroy()
-        else:
-            self.master.after(0, self.eventCall)
-
     def runVis(self):
+        """
+        TODO Fix this. It is a mess and I spent a whole day dancing around
+        it and it repeatedly punched me in the face.
+
+        Currently uses the self.translate flag to decide which loop to run
+        The translate loop uses a device wioth the sticks and calibration dictionaries
+        to produce events by role
+
+        The second loop uses the raw events from the gamepad device.
+        """
         if self.translate:
             self.t_device = RawTranslator(
                 FrameParser(self.device, self.sticks.copy()),
@@ -346,8 +418,33 @@ class Gui:
                     break
                 self.queue.put(event)
                 print(event)
+    
+    def processEvent(self):
+        """
+        Checks the queue for events and sends them to the update
+        function as they appear.
+        """
+        while self.queue.qsize():
+            event = self.queue.get(0)
+            self.update(event)
+
+    def eventCall(self):
+        """
+        Calls the event processor for any pending events.
+        If the user has closed the window saves the profile and exits.
+        Otherwise uses the main window to loop itself waiting for events
+        """
+        self.processEvent()
+        if not self.running:
+            self.save_profile()
+            self.master.destroy()
+        else:
+            self.master.after(0, self.eventCall)
 
     def switch(self):
+        """
+        Swaps the runVis to a translated loop
+        """
         self.translate = True
         self.t1 = threading.Thread(target=self.runVis)
         self.t1.daemon = True

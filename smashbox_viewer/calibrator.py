@@ -34,6 +34,8 @@ class Calibrator:
     It prompts the user to press valid modifier combinations and records the
     resulting axis outputs with the button roles.
 
+    #TODO - The exiting of this needs to be fixed so it it stops running,
+    it currently keeps the thread open indefinetly 
 
     """
 
@@ -116,59 +118,89 @@ class Calibrator:
             },
         }
 
-    def all_dirs_f(self):
-        return self.all_dirs.copy()
-
-    def x_dirs_f(self):
-        return self.x_dirs.copy()
-
-    def y_dirs_f(self):
-        return self.y_dirs.copy()
-
     def gui(self, canvas, mapping, cal_event):
         """
         This depends on the gui.py to run.  It takes in the active canvas
         and prompts the user with text across the top of the canvas.
+
+        Based on the mapping provided it will decide with calibration
+        modifiers to prompt the user for
+
+        The cal_event is a thread flag that allows this thread to wait 
+        for a frame from the gui.py
         """
         self.running = True
         self.canvas = canvas
         self.mapping = mapping
         self.cal_event = cal_event
 
-        # Grabbing joystick zeros
+        """
+        Grabbing a zero state frame to reference. Then finding the active
+        light shield button combinations, and prompting and building the calibration
+        for the light sheld
+        """
         self.get_zero()
         self.btns_lshield()
         self.get_lshield()
 
-        # Find axes, build sticks, assign dictionary values for full press
+        """
+        Gets the frame states for the joysticks, associates the joysticks with the 
+        proper 2 axis for each stick. Build the calibration for full press in 
+        all directions for each joystick
+        """
         for name in self.sticknames:
             frames = self.build_frames(list(self.all_dirs.keys()), name)
             self.build_stick(name, frames)
             self.build_states(name, frames, self.all_dirs)
 
+        """
+        Gets the joystick modifiers then prompt and build them all
+        """
         self.btns_sticks()
         self.build_mod()
 
+        """
+        If the user has any 'Mode' role button prompt calibration for them
+        with all modifiers
+        """
         mode = self.get_mode()
         if mode:
             self.build_mod(mode)
 
-        print(self.calibration)
+        """
+        Exit
+        """
+        #print(self.calibration)
         self.close_gui()
 
     def get_mode(self):
+        """
+        Detect the presence of ANY mode role button in
+        the user's mapping
+        """
         for role in self.mapping.values():
             if "Mode" in role:
                 return role
         return None
 
     def build_mod(self, mode=None):
+        """
+        Checks if this is a 'Mode' calibration loop and gets the Mode
+        calibration for all sticks.
+
+        Checks the list of modifiers for this runto see with set of 
+        directions to prompt and build calibration values.
+
+        If this is the 'Mode' run it will append the user's 'Mode' 
+        button before prompting.
+        """
         name = self.sticknames[0]
         if mode:
-            frames = self.build_frames(
-                list(self.all_dirs.keys()), self.sticknames[1], ["Mode"]
-            )
-            self.build_states(self.sticknames[1], frames, self.all_dirs, [mode])
+            for stick in self.sticknames:
+                frames = self.build_frames(
+                    list(self.all_dirs.keys()), self.sticknames[1], ["Mode"]
+                )
+                self.build_states(stick, frames, self.all_dirs, [mode])
 
         for mod in self.temps_mod[0]:
             dirs = {}
@@ -194,6 +226,16 @@ class Calibrator:
             self.build_states(name, frames, dirs, mod)
 
     def build_states(self, name, frames, directions, modifiers=None):
+        """
+        Adds the calibration states to the self.calibration dictionary
+
+        Using the stick name provided as the outer key, the tuple of axis
+        values for the inner key, and the list of modifiers for the values
+        to append to the list of lists since values can be ambiguous.
+
+        Checks for the existence of the outer key, inner key, and the state
+        to decide how to add the list
+        """
         key = f"{name}stick"
         x_axis, y_axis = self.sticks[f"{name}stick"]
         for frame, dir in zip(frames, directions.values()):
@@ -209,11 +251,29 @@ class Calibrator:
                 self.calibration[key][state] += [buttons]
 
     def build_stick(self, stick, frames):
+        """
+        Associates axis with thier joysticks based the difference
+        between the zero frame and the first 2 frames of full press
+        for each stick.
+
+        Builds a dictionary in the formL:
+        {'Astick': ('Axis0', 'Axis1'), 'Cstick': ('Axis3', 'Axis4')}
+        """
         diff_x = dict(diff_frames(self.zeros, frames[0]))
         diff_y = dict(diff_frames(frames[0], frames[1]))
         self.sticks[f"{stick}stick"] = (list(diff_x)[0], list(diff_y)[0])
 
     def build_frames(self, dirs, stick, modifiers=None):
+        """
+        Using one stick, a list of directions, and modifiers, prompts
+        the user to press the buttons to build one frame for each direction
+
+        Loops through all the directions with the modifiers and waits for the
+        gui.py to send a frame and signal to proceed.  Appends the new frame.
+
+        If the user confirms they did all the directions correct returns
+        all the frames.
+        """
         frames = []
         mods = ""
         if modifiers:
@@ -234,6 +294,10 @@ class Calibrator:
         return frames
 
     def get_zero(self):
+        """
+        Prompts the user to only press A. Waits for the frame and signal from
+        the gui.py. Starts over if the user does not confirm.
+        """
         while self.running and not self.confirm:
             self.canvas.itemconfig("prompt", text="Getting baseline only press A")
             self.wait_frame()
@@ -245,6 +309,17 @@ class Calibrator:
         self.confirm = False
 
     def btns_sticks(self):
+        """
+        Builds a list of list of modifiers based on the user mapping.
+
+        Using the dictionaries of boolean flags scans through the mapping
+        and and changed the appropriate flags.
+
+        First appends all individual modifiers.
+
+        Then using the product from each set of active modifers appends
+        all possible combinations.
+        """
         self.temps_mod = [[]]
         x_flags = {"X_1": False, "X_2": False, "X_3": False}
         y_flags = {"Y_1": False, "Y_2": False, "Y_3": False}
@@ -320,6 +395,13 @@ class Calibrator:
         """
 
     def btns_lshield(self):
+        """
+        Checks the user mapping for all possible combinations that could 
+        produce a light sheild value.
+
+        Adds values for left in the 0 index of self.temp_mods, right values 
+        are put in the 1 index.
+        """
         self.temps_mod = [[], []]
         self.in_map(0, ["Trigger_Light_L"])
 
@@ -408,6 +490,11 @@ class Calibrator:
         )
 
     def in_map(self, idx, buttons):
+        """
+        Checks the mapping for the list of buttons provided.
+        If all of the buttons list is present appends the list
+        to the index provided in self.temp_mods
+        """
         flag = True
         for btn in buttons:
             if btn not in self.mapping.values():
@@ -417,8 +504,23 @@ class Calibrator:
             self.temps_mod[idx].append(buttons)
         return flag
 
-    # TODO get values for both L/R
     def get_lshield(self):
+        """
+        TODO - Needs to get light shield values of left and right for
+        both cases
+
+        Checks the self.temp_mods lists for the presence of a 'Mode'
+        role,  If the first case is 'Mode' there is no normal case.
+        If there is no 'Mode' in any list there is only the normal case.
+
+        Prompts the user for each case, waits for the frame and signal from gui.py
+        
+        Finds the axis with the greatest change from the zero frame and saves the
+        axis and the value
+
+        Builds a temporary dictionary with both cases then updates the calibration
+        dictionary with it.
+        """
         cases = ["Normal", "Mode"]
         btns = []
         f_mode = -1
@@ -468,27 +570,52 @@ class Calibrator:
         self.confirm = False
 
     def get_calibration(self):
+        """
+        Returns the calibration dictionary
+        """
         return self.calibration
 
     def get_sticks(self):
+        """
+        Returns the stick/axis association dictionary
+        """
         return self.sticks
 
     def wait_frame(self):
+        """
+        Waits for a signal from another thread to keep from
+        consuming CPU resources.
+
+        When the signal is recieved, resets the signal flag
+        and returns to the function that called this.
+        """
         while not self.cal_event.isSet():
             self.cal_event.wait()
         self.cal_event.clear()
 
     def put_frame(self, frame):
+        """
+        Helper function that allows the gui.py to send a frame
+        of the joystick device
+        """
         if self.frame:
             self.frame.clear()
         self.frame = frame
         self.confirm = True
 
     def redo(self):
+        """
+        Clears the frame if the user does not confirm
+        the correct input of buttons
+        """
         self.frame.clear()
         self.confirm = False
 
     def close_gui(self):
+        """
+        Reset the calibration values to default
+        and remove the prompt and exit text from the canvas
+        """
         self.running = False
         self.temps_mod.clear()
         self.frame.clear()

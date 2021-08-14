@@ -1,5 +1,14 @@
 class ButtonMapper:
+    """
+    Used to build a dictonary of button roles to the raw buttons for the controller
+
+    This is performing well and exiting its thread properly
+    """
     def __init__(self):
+        """
+        Contains a list of all possible buttons that could be mapped
+        to check against the user mapping.
+        """
         self.pos_roles = [
             "Button_A",
             "Button_B",
@@ -18,11 +27,24 @@ class ButtonMapper:
         self.event = None
 
     def wait_event(self):
+        """
+        Waits for a signal that the gui.py has sent a controller event
+        then resets the signal and returns to the waiting function.
+        """
         while not self.cal_event.isSet():
             self.cal_event.wait()
         self.cal_event.clear()
 
     def build_btns(self, profile, mapping, canvas, cal_event, end_btnmap):
+        """
+        Scans the mapping and the list of all possible buttons to make
+        a list of buttons that need to be bound in the dictionary
+
+        Prompts the user to press each button and then confirm.
+        If the user presses B or any button that is not assigned properly
+        will restart the loop. Upon confirmation updates the dictionary
+        and quits.
+        """
         self.cal_event = cal_event
         self.canvas = canvas
 
@@ -58,6 +80,11 @@ class ButtonMapper:
         self.close()
 
     def add_button(self, btn, role, map):
+        """
+        Helper function to add roles to the dictonary. The elif/else
+        are only necesarry if the user is pressing the same button for multiple
+        roles.
+        """
         if btn not in map:
             map[btn] = {1: [[role]]}
         elif 1 not in map[btn]:
@@ -66,12 +93,19 @@ class ButtonMapper:
             map[btn][1].append([role])
 
     def put_event(self, event):
+        """
+        Helper function that allows the gui.py to send a raw controller
+        event
+        """
         if self.event:
             self.event = None
         self.event = event
         self.confirm = True
 
     def close(self):
+        """
+        Reset variables to default and remove the prompting text from the screen
+        """
         self.roles.clear()
         self.event = None
         self.confirm = False
