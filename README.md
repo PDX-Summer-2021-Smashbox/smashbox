@@ -118,3 +118,20 @@ The original inspiration for this project was
 [`padpyght`](https://github.com/lifning/padpyght). The idea of containing a
 directory of image assets for a specific controller and referring to it as a
 "skin" is also theirs.
+
+Checklist
+=========
+
+| Thing | Done? |
+|----------|-----------|
+| Content is original | ✔️ |
+| Full names | ✔️ |
+| Project name | ✔️ |
+| Description | ✔️ |
+| Build Instructions | ✔️️ |
+| Install Instructions | ✔️️ |
+| Run Instructions | ❌ ️|
+| Demo run | ❌ |
+| Acknowledgements | ✔️️ |
+| License | ✔️️ |
+| License Pointer | ✔️️ |
