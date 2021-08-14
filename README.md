@@ -53,6 +53,15 @@ You\'ll need to install `poetry` from Pypi with
 python -m pip install poetry
 ```
 
+Running the Unit Tests
+======================
+
+Run
+
+``` {.bash}
+python -m poetry run pytest
+```
+
 Testing a package
 =================
 
