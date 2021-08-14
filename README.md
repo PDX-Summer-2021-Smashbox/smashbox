@@ -88,6 +88,15 @@ the `smashbox_viewer.recorder` with
 python -m smashbox_viewer.recorder
 ```
 
+Running
+=======
+
+Assuming that you've installed the `.whl` into your Python environment, run
+
+``` {.bash}
+python -m smashbox_viewer.gui_thread
+```
+
 Playing Nicely with IDEs During Development
 ===========================================
 
