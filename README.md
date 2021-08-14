@@ -53,6 +53,15 @@ You\'ll need to install `poetry` from Pypi with
 python -m pip install poetry
 ```
 
+Running the Unit Tests
+======================
+
+Run
+
+``` {.bash}
+python -m poetry run pytest
+```
+
 Testing a package
 =================
 
@@ -96,3 +105,33 @@ directory, meaning that it will be detected by VSCode.
 
 You can then delete the `venv` and run `poetry install` to create the
 new one.
+
+License
+=======
+
+MIT. See [LICENSE](LICENSE).
+
+Acknowledgements
+================
+
+The original inspiration for this project was
+[`padpyght`](https://github.com/lifning/padpyght). The idea of containing a
+directory of image assets for a specific controller and referring to it as a
+"skin" is also theirs.
+
+Checklist
+=========
+
+| Thing | Done? |
+|----------|-----------|
+| Content is original | ✔️ |
+| Full names | ✔️ |
+| Project name | ✔️ |
+| Description | ✔️ |
+| Build Instructions | ✔️️ |
+| Install Instructions | ✔️️ |
+| Run Instructions | ❌ ️|
+| Demo run | ❌ |
+| Acknowledgements | ✔️️ |
+| License | ✔️️ |
+| License Pointer | ✔️️ |
