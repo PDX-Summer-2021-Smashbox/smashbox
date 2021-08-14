@@ -25,8 +25,7 @@ def test_sequential_poller():
     """
     p = poller.SequentialMockPoller(consts.SIMPLE_BUTTON_FRAMES, loop=True)
     assert (
-        list(itertools.islice(p, poller.DEVICE_HZ * 2))
-        == consts.SIMPLE_BUTTON_FRAMES * 2
+        list(itertools.islice(p, poller.DEVICE_HZ * 2)) == consts.SIMPLE_BUTTON_FRAMES
     )
 
 
