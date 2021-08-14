@@ -57,7 +57,7 @@ BUTTON_ROLES = [
     "Modifier_DPad_Toggle",  # X1 becomes DPad_Left, Y1 becomes DPad_Up,
     # X2 becomes DPad_Down, Y2 becomes DPad_Right
     "Modifier_Analog_Stick_Becomes_C_Stick",  # Analog Stick directions become C-Stick directional Inputs.
-    "Modifier_Analog_Stick_Becomes_Dpad",  # Analog Stick directions become Dpad directional inputs.
+    "Modifier_Analog_Stick_Becomes_DPad",  # Analog Stick directions become Dpad directional inputs.
     # Extra buttons specific to PC-USB mode for mapping buttons like PS4 home button, back button, etc.
     "USB_EXTRA_1",
     "USB_EXTRA_2",
