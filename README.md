@@ -110,3 +110,11 @@ License
 =======
 
 MIT. See [LICENSE](LICENSE).
+
+Acknowledgements
+================
+
+The original inspiration for this project was
+[`padpyght`](https://github.com/lifning/padpyght). The idea of containing a
+directory of image assets for a specific controller and referring to it as a
+"skin" is also theirs.
