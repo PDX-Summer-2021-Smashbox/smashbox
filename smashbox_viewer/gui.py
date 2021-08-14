@@ -217,7 +217,7 @@ class Gui:
         self.master.withdraw()
 
         root = tk.Toplevel()
-        self.mapper.gui(root, self.base, self.button)
+        self.mapper.gui(root, self.base)
         while True:
             root.update_idletasks()
             root.update()
