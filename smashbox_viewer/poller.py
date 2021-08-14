@@ -23,7 +23,7 @@ import pygame
 # meaning that a `for` loop can iterate over them if so desired.
 
 
-DEVICE_HZ = 30
+DEVICE_HZ = 125
 
 
 class JoystickPoller:
