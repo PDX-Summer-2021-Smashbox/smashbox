@@ -4,6 +4,7 @@ class ButtonMapper:
 
     This is performing well and exiting its thread properly
     """
+
     def __init__(self):
         """
         Contains a list of all possible buttons that could be mapped
@@ -110,4 +111,3 @@ class ButtonMapper:
         self.event = None
         self.confirm = False
         self.canvas.delete("prompt")
-        

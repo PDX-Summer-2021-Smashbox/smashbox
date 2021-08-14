@@ -35,7 +35,7 @@ class Calibrator:
     resulting axis outputs with the button roles.
 
     #TODO - The exiting of this needs to be fixed so it it stops running,
-    it currently keeps the thread open indefinetly 
+    it currently keeps the thread open indefinetly
 
     """
 
@@ -126,7 +126,7 @@ class Calibrator:
         Based on the mapping provided it will decide with calibration
         modifiers to prompt the user for
 
-        The cal_event is a thread flag that allows this thread to wait 
+        The cal_event is a thread flag that allows this thread to wait
         for a frame from the gui.py
         """
         self.running = True
@@ -170,7 +170,7 @@ class Calibrator:
         """
         Exit
         """
-        #print(self.calibration)
+        # print(self.calibration)
         self.close_gui()
 
     def get_mode(self):
@@ -188,10 +188,10 @@ class Calibrator:
         Checks if this is a 'Mode' calibration loop and gets the Mode
         calibration for all sticks.
 
-        Checks the list of modifiers for this runto see with set of 
+        Checks the list of modifiers for this runto see with set of
         directions to prompt and build calibration values.
 
-        If this is the 'Mode' run it will append the user's 'Mode' 
+        If this is the 'Mode' run it will append the user's 'Mode'
         button before prompting.
         """
         name = self.sticknames[0]
@@ -396,10 +396,10 @@ class Calibrator:
 
     def btns_lshield(self):
         """
-        Checks the user mapping for all possible combinations that could 
+        Checks the user mapping for all possible combinations that could
         produce a light sheild value.
 
-        Adds values for left in the 0 index of self.temp_mods, right values 
+        Adds values for left in the 0 index of self.temp_mods, right values
         are put in the 1 index.
         """
         self.temps_mod = [[], []]
@@ -514,7 +514,7 @@ class Calibrator:
         If there is no 'Mode' in any list there is only the normal case.
 
         Prompts the user for each case, waits for the frame and signal from gui.py
-        
+
         Finds the axis with the greatest change from the zero frame and saves the
         axis and the value
 
