@@ -97,6 +97,11 @@ Assuming that you've installed the `.whl` into your Python environment, run
 python -m smashbox_viewer.gui_thread
 ```
 
+Video
+=====
+
+[https://www.youtube.com/watch?v=4tLo9X3cbYo](https://www.youtube.com/watch?v=4tLo9X3cbYo)
+
 Playing Nicely with IDEs During Development
 ===========================================
 
@@ -141,7 +146,7 @@ Checklist
 | Install Instructions | ✔️️ |
 | Unit Test Instructions | ✔️️ | 
 | Run Instructions | ✔️️ |
-| Demo run | ❌ |
+| Demo run | ✔️️ |
 | Acknowledgements | ✔️️ |
 | License | ✔️️ |
 | License Pointer | ✔️️ |
