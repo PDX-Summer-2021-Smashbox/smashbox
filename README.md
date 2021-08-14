@@ -96,3 +96,8 @@ directory, meaning that it will be detected by VSCode.
 
 You can then delete the `venv` and run `poetry install` to create the
 new one.
+
+License
+=======
+
+MIT. See [LICENSE](LICENSE).
